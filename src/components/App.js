@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import { Route } from 'react-router-dom'
-
+import { connect } from 'react-redux'
+import { addPost } from '../actions'
 import './App.css'
 
 import * as API from '../utils/api'
@@ -25,25 +26,55 @@ class App extends Component {
     })
   }
 
+  post = {
+      type: 'ADD_POST',
+      id: '8xf0y6ziyjabvozdd253am',
+      timestamp: 1467166872634,
+      title: 'Udacity is the best place to learn React',
+      body: 'Everyone says so after all.',
+      author: 'thingtwo',
+      category: 'react',
+      voteScore: 6,
+      deleted: false 
+    }
+
   render() {
+    console.log(this.props)
+    // console.log(this.state.categories)
+    // console.log(this.state.posts)
+
     return (
       <div className="App">
-        <Route exact path='/' render={() => (
-          <div className="container">
-            <div className="row">
-              <AllCategory />
-              <AllCategory />
-              <AllCategory />
-              <AllCategory />
-            </div>
-          </div>
-        )}/>
-        <Route path='/posts' render={() => (
-          <Post />
-        )}/>
+        <button onClick ={() => this.props.dispatch(addPost(this.post))}>
+          test
+        </button>
+        <ol>
+          {this.props.post.map((post) => (
+            <li key={post.id}>
+              <p>{post.title}</p>
+              <p>{post.body}</p>
+              <p>{post.author}</p>
+              <p>{post.category}</p>
+              <p>{post.voteScore}</p>
+            </li>
+          ))}
+        </ol>
       </div>
     );
   }
 }
 
-export default App;
+function mapStateToProps ( { post, comment } ){
+    
+    return {
+      post : Object.keys(post).map((id) => ({
+        ...post[id]
+      })),
+      comment : Object.keys(comment).map((id) => ({
+        ...comment[id]
+      }))
+    }
+}
+
+
+export default connect(mapStateToProps)(App);
