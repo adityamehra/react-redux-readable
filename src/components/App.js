@@ -10,7 +10,18 @@ import * as API from '../utils/api'
 
 class App extends Component {
 
+  state = {
+    comments: null
+  }
+
   componentDidMount(){
+
+    API
+      .getAllComments('8xf0y6ziyjabvozdd253nd')
+      .then(comments => {
+        this.setState({ comments })
+      })
+
     this.props.dispatch(fetchCategories())
     this.props.dispatch(fetchPosts())
   }
@@ -29,6 +40,7 @@ class App extends Component {
 
   render() {
     console.log(this.props)
+    console.log(this.state.comments)
 
     return (
       <div className="App">
@@ -76,7 +88,10 @@ class App extends Component {
                   return null;
                 })}
               </ol>
-              <button> Add a post </button>
+              
+              <button type="button" className="btn btn-default" onClick ={() => this.props.dispatch(addPost(this.post))}>
+                Add a Post <span className="glyphicon glyphicon-pencil"></span>
+              </button>
             </div>
           )
         }}/>
@@ -143,16 +158,16 @@ function mapStateToProps ( { category, post, comment } ){
     }
 }
 
-const fetchPosts = () => dispatch => (
-  API
-    .getAllPosts()
-    .then(posts => dispatch(receivePosts(posts)))
-);
-
 const fetchCategories = () => dispatch => (
   API
     .getAllCategories()
     .then(categories => dispatch(receiveCategories(categories)))
+);
+
+const fetchPosts = () => dispatch => (
+  API
+    .getAllPosts()
+    .then(posts => dispatch(receivePosts(posts)))
 );
 
 
