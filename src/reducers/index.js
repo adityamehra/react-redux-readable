@@ -1,8 +1,9 @@
 import { combineReducers } from 'redux'
-import * as API from '../utils/api'
 
 import {
+	RECEIVE_CATEGORY,
 	RECEIVE_POSTS, 
+	RECEIVE_COMMENTS,
 	ADD_POST,
 	ADD_COMMENT, 
 	EDIT_POST,
@@ -10,6 +11,28 @@ import {
 	DELETE_POST, 
 	DELETE_COMMENT 
 } from '../actions'
+
+function category (state = {}, action) {
+
+	const { categories } = action
+
+	switch(action.type){
+		case RECEIVE_CATEGORY:
+			
+			let result = categories['categories'].reduce((obj,item) => {
+							obj[item.name] = item; 
+							return obj;
+					}, {});
+				
+			return {
+				...state,
+				...result
+			}
+			
+		default:
+			return state;
+	}
+}
 
 /** 
  * Post
@@ -23,38 +46,20 @@ import {
  * deleted		Boolean	Flag if post has been 'deleted' (inaccessible by the front end), (default: false) 
  */
 
-const initialPosts = {
-	"8xf0y6ziyjabvozdd253nd": {
-	    id: '8xf0y6ziyjabvozdd253nd',
-	    timestamp: 1467166872634,
-	    title: 'Udacity is the best place to learn React',
-	    body: 'Everyone says so after all.',
-	    author: 'thingtwo',
-	    category: 'react',
-	    voteScore: 6,
-	    deleted: false 
-	},
-  	"6ni6ok3ym7mf1p33lnez": {
-	    id: '6ni6ok3ym7mf1p33lnez',
-	    timestamp: 1468479767190,
-	    title: 'Learn Redux in 10 minutes!',
-	    body: 'Just kidding. It takes more than 10 minutes to learn technology.',
-	    author: 'thingone',
-	    category: 'redux',
-	    voteScore: -5,
-	    deleted: false
-    }
-}
-
 function post (state = {}, action) {
 
 	const { id, timestamp, title, body, author, category, voteScore, deleted, posts } = action
 
 	switch(action.type){
 		case RECEIVE_POSTS:
+
+			let result = posts.reduce((obj,item) => {
+  							obj[item.id] = item; 
+  							return obj;
+						}, {});
 			return {
 				...state,
-				posts
+				...result
 			}
 		case ADD_POST:
 			return {
@@ -135,7 +140,7 @@ const initialComments = {
 
 function comment (state = initialComments, action) {
 
-	const { id, parentId, timestamp, body, author, voteScore, deleted, parentDeleted } = action
+	// const { id, parentId, timestamp, body, author, voteScore, deleted, parentDeleted } = action
 
 	switch(action.type){
 		case ADD_COMMENT:
@@ -147,10 +152,10 @@ function comment (state = initialComments, action) {
 		default:
 			return state;
 	}
-
 }
 
 export default combineReducers({
+	category,
 	post,
 	comment
 })
