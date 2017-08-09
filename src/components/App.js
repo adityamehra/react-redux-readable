@@ -1,29 +1,27 @@
 import React, { Component } from 'react'
 import { Route } from 'react-router-dom'
 import { connect } from 'react-redux'
-import { addPost, receivePosts, receiveCategories } from '../actions'
+import { addPost, receiveCategories, receivePosts, receiveComments } from '../actions'
 
 import * as API from '../utils/api'
 
-// import AllCategory from './AllCategories'
-// import Post from './Post'
-
 class App extends Component {
 
-  state = {
-    comments: null
-  }
+  // state = {
+  //   comments: null
+  // }
 
   componentDidMount(){
 
-    API
-      .getAllComments('8xf0y6ziyjabvozdd253nd')
-      .then(comments => {
-        this.setState({ comments })
-      })
+    // API
+    //   .getAllComments('8xf0y6ziyjabvozdd253nd')
+    //   .then(comments => {
+    //     this.setState({ comments })
+    //   })
 
     this.props.dispatch(fetchCategories())
     this.props.dispatch(fetchPosts())
+    this.props.dispatch(fetchComments())
   }
 
   post = {
@@ -39,8 +37,8 @@ class App extends Component {
   }
 
   render() {
-    console.log(this.props)
-    console.log(this.state.comments)
+    // console.log(this.props)
+    // console.log(this.state.comments)
 
     return (
       <div className="App">
@@ -103,7 +101,7 @@ class App extends Component {
                 {this.props.post.map((post) => {
                   if(post.id === postId){
                     return (
-                          <div>
+                          <div key={post.id}>
                             <h3>{post.title} <span className="label label-primary">{post.voteScore}</span></h3>
                             <p>{post.category}</p>
                             <p>{post.author}</p>
@@ -168,6 +166,12 @@ const fetchPosts = () => dispatch => (
   API
     .getAllPosts()
     .then(posts => dispatch(receivePosts(posts)))
+);
+
+const fetchComments = () => dispatch => (
+  API
+    .getAllComments('8xf0y6ziyjabvozdd253nd')
+    .then(comments => dispatch(receiveComments(comments)))
 );
 
 
