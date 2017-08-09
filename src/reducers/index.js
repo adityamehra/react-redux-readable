@@ -13,22 +13,17 @@ import {
 } from '../actions'
 
 function category (state = {}, action) {
-
 	const { categories } = action
-
 	switch(action.type){
 		case RECEIVE_CATEGORY:
-			
 			let result = categories['categories'].reduce((obj,item) => {
 							obj[item.name] = item; 
 							return obj;
-					}, {});
-				
+					}, {});			
 			return {
 				...state,
 				...result
-			}
-			
+			}	
 		default:
 			return state;
 	}
@@ -52,7 +47,6 @@ function post (state = {}, action) {
 
 	switch(action.type){
 		case RECEIVE_POSTS:
-
 			let result = posts.reduce((obj,item) => {
   							obj[item.id] = item; 
   							return obj;
@@ -138,13 +132,22 @@ const initialComments = {
   }
 }
 
-function comment (state = initialComments, action) {
+function comment (state = {}, action) {
 
-	// const { id, parentId, timestamp, body, author, voteScore, deleted, parentDeleted } = action
+	const { id, parentId, timestamp, body, author, voteScore, deleted, parentDeleted, comments } = action
 
 	switch(action.type){
 		case RECEIVE_COMMENTS:
-			return state
+			console.log(RECEIVE_COMMENTS);
+			console.log(comments)
+			let result = comments.reduce((obj,item) => {
+  							obj[item.id] = item; 
+  							return obj;
+						}, {});
+			return {
+				...state,
+				...result
+			}
 		case ADD_COMMENT:
 			return state
 		case EDIT_COMMENT:
