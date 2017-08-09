@@ -143,12 +143,14 @@ function comment (state = initialComments, action) {
 	// const { id, parentId, timestamp, body, author, voteScore, deleted, parentDeleted } = action
 
 	switch(action.type){
+		case RECEIVE_COMMENTS:
+			return state
 		case ADD_COMMENT:
-			return 
+			return state
 		case EDIT_COMMENT:
-			return 
+			return state
 		case DELETE_COMMENT:
-			return
+			return state
 		default:
 			return state;
 	}
