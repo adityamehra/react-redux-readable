@@ -17,15 +17,8 @@ export function receiveCategories( categories ){
 
 export function receivePosts( posts ){
 	return {
-		type : 'RECEIVE_POSTS',
+		type : RECEIVE_POSTS,
 		posts
-	}
-}
-
-export function receiveComments( comments ){
-	return {
-		type : 'RECEIVE_POSTS',
-		comments
 	}
 }
 
@@ -61,6 +54,13 @@ export function deletePost({ id }) {
 	return {
 		type : DELETE_POST,
 		id
+	}
+}
+
+export function receiveComments( comments ){
+	return {
+		type : RECEIVE_COMMENTS,
+		comments
 	}
 }
 
