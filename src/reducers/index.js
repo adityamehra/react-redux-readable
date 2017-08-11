@@ -133,13 +133,9 @@ const initialComments = {
 }
 
 function comment (state = {}, action) {
-
 	const { id, parentId, timestamp, body, author, voteScore, deleted, parentDeleted, comments } = action
-
 	switch(action.type){
 		case RECEIVE_COMMENTS:
-			console.log(RECEIVE_COMMENTS);
-			console.log(comments)
 			let result = comments.reduce((obj,item) => {
   							obj[item.id] = item; 
   							return obj;
