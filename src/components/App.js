@@ -14,21 +14,9 @@ class App extends Component {
     this.props.dispatch(fetchPostsAndComments()) 
   }
 
-  post = {
-      id: '8xf0y6ziyjabvozdd253am',
-      timestamp: 1467166872634,
-      title: 'Udacity is the best place to learn React',
-      body: 'Everyone says so after all.',
-      author: 'thingtwo',
-      category: 'react',
-      voteScore: 6,
-      deleted: false 
-  }
-
   handlePostSubmit = (e) => {
     e.preventDefault()
     const values = serializeForm(e.target, { hash: true })
-    console.log(values)
     const post = {
       id: Math.random().toString(36).substr(-8),
       timestamp: Date.now(),
@@ -39,40 +27,87 @@ class App extends Component {
       voteScore: 1,
       deleted: false 
     }
-
     this.props.dispatch(postPost(post))
   }
 
+  handleCommentSubmit = (postId) => (e) => {
+    e.preventDefault()
+    const values = serializeForm(e.target, { hash: true })
+    const comment = {
+      id: Math.random().toString(36).substr(-8),
+      parentId: postId,
+      timestamp: Date.now(),
+      body: values.comment,
+      author: values.author,
+      voteScore: 1,
+      deleted: false,
+      parentDeleted: false 
+    }
+    this.props.dispatch(postComment(comment))
+  }
   
 
   render() {
     return (
       <div className="App">
         <Route exact path='/' render={() => (
-          <div>
-            <ul className="list-unstyled">
-              {this.props.category.map((category) => (
-                <li key={category.name}>
-                  <h2>
-                    <a href={`/${category.name}/posts`}>{category.name}</a>
-                  </h2>
-                  <a className="btn btn-success btn-xs" href={`/${category.name}/newPost`}> Add Post <span className="glyphicon glyphicon-pencil"></span> </a>
-                  <ul>
-                    {this.props.post.map((post) => {
-                      if(post.category === category.name && !post.deleted){
-                        return (<li key={post.id}>
-                                  <h3><a href={`/post/${post.id}`}>{post.title}</a> <span className="label label-primary">{post.voteScore}</span></h3>
-                                </li>)
-                      }
-                      return null;
-                    })}
-                  </ul>
-                </li>
-              ))}
-            </ul>
-            <button className="btn btn-primary" onClick ={() => this.props.dispatch(addPost(this.post))}>
-              test
-            </button>
+          <div className="container">
+            <div className="row">
+              <nav className="navbar navbar-inverse">
+                <div className="container-fluid">
+                  <div className="navbar-header">
+                    <button type="button" className="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                      <span className="sr-only">Toggle navigation</span>
+                      <span className="icon-bar"></span>
+                      <span className="icon-bar"></span>
+                      <span className="icon-bar"></span>
+                    </button>
+                    <a className="navbar-brand" href="/">Brand</a>
+                  </div>
+                  <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                    <ul className="nav navbar-nav">
+                      <li className="active"><a href="#">Link <span className="sr-only">(current)</span></a></li>
+                      <li><a href="#">Link</a></li>
+                      <li className="dropdown">
+                        <a href="#" className="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Categories<span className="caret"></span></a>
+                        <ul className="dropdown-menu">
+                          <li><a href="#">Action</a></li>
+                          <li><a href="#">Another action</a></li>
+                          <li><a href="#">Something else here</a></li>
+                          <li role="separator" className="divider"></li>
+                          <li><a href="#">Separated link</a></li>
+                          <li role="separator" className="divider"></li>
+                          <li><a href="#">One more separated link</a></li>
+                        </ul>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </nav>
+              <div className="col-md-6">
+                  {this.props.category.map((category) => (
+                    <div className="category-border" key={category.name}>
+                      <h2>
+                        <a href={`/${category.name}/posts`}>{category.name}</a>
+                      </h2>
+                      <a className="btn btn-success btn-xs" href={`/${category.name}/newPost`}> Write new post <span className="glyphicon glyphicon-pencil"></span> </a>
+                      <ul>
+                        {this.props.post.map((post) => {
+                          if(post.category === category.name && !post.deleted){
+                            return (<li key={post.id}>
+                                      <h3><a href={`/post/${post.id}`}>{post.title}</a> <span className="label label-primary">{post.voteScore}</span></h3>
+                                    </li>)
+                          }
+                          return null;
+                        })}
+                      </ul>
+                    </div>
+                  ))}
+                <button className="btn btn-primary" onClick ={() => this.props.dispatch(addPost(this.post))}>
+                  Test
+                </button>
+              </div>
+            </div>
           </div>
         )}/>
         <Route path='/:category/posts'  render={({match}) => {
@@ -82,7 +117,7 @@ class App extends Component {
               <h2>
                {category}
               </h2>
-              <a className="btn btn-success btn-xs" href={`/${category.name}/newPost`}> Add Post <span className="glyphicon glyphicon-pencil"></span></a>
+              <a className="btn btn-success btn-xs" href={`/${category}/newPost`}> Write new post <span className="glyphicon glyphicon-pencil"></span></a>
               <ol>
                 {this.props.post.map((post) => {
                   if(post.category === category){
@@ -113,8 +148,8 @@ class App extends Component {
                           <hr />
                           <p>
                             Vote score <span className="badge"> {post.voteScore}</span>
-                            <button type="button" className="btn btn-danger btn-xs pull-right"> Delete Post </button>
-                            <button type="button" className="btn btn-warning btn-xs pull-right"> Edit Post </button>  
+                            <button type="button" className="btn btn-danger btn-xs pull-right"> Delete post <span className="glyphicon glyphicon-trash"></span></button>
+                            <button type="button" className="btn btn-warning btn-xs pull-right"> Edit post </button>  
                           </p>
                           <hr />
                           <p><span className="glyphicon glyphicon-time"></span> Posted on {(new Date(post.timestamp)).toString()}</p>
@@ -124,15 +159,19 @@ class App extends Component {
                           <h4>Comments</h4>
                           <div className="well">
                             <h4>Leave a Comment:</h4>
-                            <form>
+                            <form onSubmit={this.handleCommentSubmit(postId)}>
                                 <div className="form-group">
-                                    <textarea className="form-control" rows="3"></textarea>
+                                     <input type="text" name="author" className="form-control" placeholder="Author" />
                                 </div>
-                                <button className="btn btn-primary">Submit</button>
+                                <div className="form-group">
+                                    <textarea type="text" name="comment" className="form-control" rows="3" placeholder="Comment"></textarea>
+                                </div>
+    
+                                <button className="btn btn-primary">Comment</button>
                             </form>
                           </div>
                           <hr />
-                          <ol>
+                          <div>
                             {this.props.comment.map((comment) => {
                               if(comment.parentId === post.id){
                                 return (
@@ -143,14 +182,17 @@ class App extends Component {
                                     <div className="media-body">
                                         <h4 className="media-heading">{comment.author}  <small>{(new Date(comment.timestamp)).toString()}</small>
                                         </h4>
-                                        {comment.body}
+                                        <p>{comment.body}</p>
+                                        <a><span>Upvote</span> | <span>{comment.voteScore}</span></a>
+                                        <button type="button" className="btn btn-danger btn-xs pull-right"><span className="glyphicon glyphicon-trash"></span></button>
+                                        <button type="button" className="btn btn-warning btn-xs pull-right"> Edit </button>
                                     </div>
                                   </div>
                                 )
                               }
                               return null;
                             })}
-                          </ol>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -200,27 +242,6 @@ class App extends Component {
   }
 }
 
-// const categoryView = ({match}) => {
-//   const category =  match.params.category
-//   return (
-//     <div>
-//       <h2>
-//        {category}
-//       </h2>
-//       <ol>
-//         {this.props.post.map((post) => {
-//           if(post.category === category){
-//             return (<li key={post.id}>
-//                       <h3>{post.title} <span className="label label-primary">{post.voteScore}</span></h3>
-//                     </li>)
-//           }
-//           return null;
-//         })}
-//       </ol>
-//     </div>
-//   )
-// }
-
 function mapStateToProps ( { category, post, comment } ){
     
     return {
@@ -267,6 +288,12 @@ const fetchComments = (posts) => dispatch => (
 const postPost = (post) => dispatch => (
   API
     .createPost(post)
+    .then(dispatch(fetchPosts()))
+);
+
+const postComment = (comment) => dispatch => (
+  API
+    .createComment(comment)
     .then(dispatch(fetchPosts()))
 );
 
