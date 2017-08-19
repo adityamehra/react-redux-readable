@@ -1,19 +1,20 @@
 import React, { Component } from 'react'
-import { Route } from 'react-router-dom'
+import { Route, Link } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { addPost, receiveCategories, receivePosts, receiveComments } from '../actions'
+import './App.css'
+import serializeForm from 'form-serialize'
 
 import * as API from '../utils/api'
 
 class App extends Component {
 
-  componentDidMount(){
+  componentDidMount() {
     this.props.dispatch(fetchCategories())
     this.props.dispatch(fetchPostsAndComments()) 
   }
 
   post = {
-      type: 'ADD_POST',
       id: '8xf0y6ziyjabvozdd253am',
       timestamp: 1467166872634,
       title: 'Udacity is the best place to learn React',
@@ -24,46 +25,64 @@ class App extends Component {
       deleted: false 
   }
 
-  render() {
-    console.log(this.props)
-    // console.log(this.state.comments)
+  handlePostSubmit = (e) => {
+    e.preventDefault()
+    const values = serializeForm(e.target, { hash: true })
+    console.log(values)
+    const post = {
+      id: Math.random().toString(36).substr(-8),
+      timestamp: Date.now(),
+      title: values.title,
+      body: values.body,
+      author: values.author,
+      category: values.category,
+      voteScore: 1,
+      deleted: false 
+    }
 
+    this.props.dispatch(postPost(post))
+  }
+
+  
+
+  render() {
     return (
       <div className="App">
         <Route exact path='/' render={() => (
           <div>
-            <ol>
+            <ul className="list-unstyled">
               {this.props.category.map((category) => (
                 <li key={category.name}>
                   <h2>
                     <a href={`/${category.name}/posts`}>{category.name}</a>
                   </h2>
-                  <ol>
+                  <a className="btn btn-success btn-xs" href={`/${category.name}/newPost`}> Add Post <span className="glyphicon glyphicon-pencil"></span> </a>
+                  <ul>
                     {this.props.post.map((post) => {
-                      if(post.category === category.name){
+                      if(post.category === category.name && !post.deleted){
                         return (<li key={post.id}>
                                   <h3><a href={`/post/${post.id}`}>{post.title}</a> <span className="label label-primary">{post.voteScore}</span></h3>
                                 </li>)
                       }
                       return null;
                     })}
-                  </ol>
+                  </ul>
                 </li>
               ))}
-            </ol>
-            <button onClick ={() => this.props.dispatch(addPost(this.post))}>
+            </ul>
+            <button className="btn btn-primary" onClick ={() => this.props.dispatch(addPost(this.post))}>
               test
             </button>
           </div>
         )}/>
         <Route path='/:category/posts'  render={({match}) => {
           const category =  match.params.category
-
           return (
             <div>
               <h2>
                {category}
               </h2>
+              <a className="btn btn-success btn-xs" href={`/${category.name}/newPost`}> Add Post <span className="glyphicon glyphicon-pencil"></span></a>
               <ol>
                 {this.props.post.map((post) => {
                   if(post.category === category){
@@ -74,11 +93,7 @@ class App extends Component {
                   return null;
                 })}
               </ol>
-              <button type="button" className="btn btn-default" onClick ={() => this.props.dispatch(addPost(this.post))}>
-                Add a Post <span className="glyphicon glyphicon-pencil"></span>
-              </button>
             </div>
-
           )
         }}/>
         <Route path='/post/:id' render={({match}) => {
@@ -91,9 +106,15 @@ class App extends Component {
                     <div className="container" key={post.id}>
                       <div className="row">
                         <div className="col-md-6">
-                          <h1>{post.title} <span className="badge">{post.voteScore}</span></h1>
+                          <h1>{post.title}</h1>
                           <p className="lead">
                               by <a href="">{post.author}</a>
+                          </p>
+                          <hr />
+                          <p>
+                            Vote score <span className="badge"> {post.voteScore}</span>
+                            <button type="button" className="btn btn-danger btn-xs pull-right"> Delete Post </button>
+                            <button type="button" className="btn btn-warning btn-xs pull-right"> Edit Post </button>  
                           </p>
                           <hr />
                           <p><span className="glyphicon glyphicon-time"></span> Posted on {(new Date(post.timestamp)).toString()}</p>
@@ -140,6 +161,40 @@ class App extends Component {
             </div>
           )
         }}/>
+        <Route path='/:category/newPost' render={({match}) => {
+          // const category = match.params.category
+          return (
+            <div className="container">
+              <div className="row">
+                <div className="col-md-6">
+                  <form onSubmit={this.handlePostSubmit}>
+                    <div className="form-group">
+                      <label>Title</label>
+                      <input type="text" name="title" className="form-control" id="exampleInputEmail1" placeholder="Title" />
+                    </div>
+                    <div className="form-group">
+                      <label>Author</label>
+                      <input type="text" name="author" className="form-control" id="exampleInputPassword1" placeholder="Author" />
+                    </div>
+                    <div className="form-group">
+                      <label>Category</label>
+                      <select name="category" className="form-control">
+                        {this.props.category.map(category => <option key={category.name}>{category.name}</option>)}
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label>Post</label>
+                      <textarea name="body" className="form-control" rows="8"></textarea>
+                    </div>
+                    <button className="btn btn-primary">
+                      Add Post
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </div>
+          )
+        }}/>
       </div>
     );
   }
@@ -147,7 +202,6 @@ class App extends Component {
 
 // const categoryView = ({match}) => {
 //   const category =  match.params.category
-
 //   return (
 //     <div>
 //       <h2>
@@ -188,11 +242,9 @@ const fetchCategories = () => dispatch => (
     .then(categories => dispatch(receiveCategories(categories)))
 );
 
-const fetchPostsAndComments = () => dispatch => {
-  return dispatch(
-    fetchPosts()
-  )
-}
+const fetchPostsAndComments = () => dispatch => (
+  dispatch(fetchPosts())
+)
 
 const fetchPosts = () => dispatch => (
   API
@@ -205,12 +257,18 @@ const fetchPosts = () => dispatch => (
     })
 );
 
-const fetchComments = (posts) => dispatch => {
-  return posts.map((post) => API
+const fetchComments = (posts) => dispatch => (
+  posts.map((post) => API
     .getAllComments(post.id)
     .then(comments => dispatch(receiveComments(comments)))
   )
-}
+);
+
+const postPost = (post) => dispatch => (
+  API
+    .createPost(post)
+    .then(dispatch(fetchPosts()))
+);
 
 export default connect(mapStateToProps)(App);
 
