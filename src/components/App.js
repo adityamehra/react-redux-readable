@@ -4,6 +4,10 @@ import { connect } from 'react-redux'
 import { addPost, receiveCategories, receivePosts, receiveComments } from '../actions'
 import './App.css'
 import serializeForm from 'form-serialize'
+import { Snackbar } from 'react-redux-snackbar';
+import { showSnack, dismissSnack } from 'react-redux-snackbar';
+
+
 
 import * as API from '../utils/api'
 
@@ -12,6 +16,14 @@ class App extends Component {
   componentDidMount() {
     this.props.dispatch(fetchCategories())
     this.props.dispatch(fetchPostsAndComments()) 
+  }
+
+  showSnackBar = (id, label) => {
+    this.props.dispatch(showSnack(id, {
+      label: label,
+      timeout: 3000,
+      button: { label: 'OK' }
+    }));
   }
 
   handlePostSubmit = (e) => {
@@ -28,6 +40,7 @@ class App extends Component {
       deleted: false 
     }
     this.props.dispatch(postPost(post))
+    this.showSnackBar(Math.random().toString(36).substr(-8), "Post added!")
   }
 
   handleCommentSubmit = (postId) => (e) => {
@@ -45,11 +58,16 @@ class App extends Component {
     }
     this.props.dispatch(postComment(comment))
   }
+
+  handleDeletePost = (id) => {
+    this.props.dispatch(deletePost(id))
+  }
   
 
   render() {
     return (
       <div className="App">
+        <Snackbar />
         <Route exact path='/' render={() => (
           <div className="container">
             <div className="row">
@@ -62,11 +80,11 @@ class App extends Component {
                       <span className="icon-bar"></span>
                       <span className="icon-bar"></span>
                     </button>
-                    <a className="navbar-brand" href="/">Brand</a>
+                    <a className="navbar-brand" href="/">Readable</a>
                   </div>
                   <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
                     <ul className="nav navbar-nav">
-                      <li className="active"><a href="#">Link <span className="sr-only">(current)</span></a></li>
+                      <li><a href="#">Link <span className="sr-only">(current)</span></a></li>
                       <li><a href="#">Link</a></li>
                       <li className="dropdown">
                         <a href="#" className="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Categories<span className="caret"></span></a>
@@ -146,11 +164,20 @@ class App extends Component {
                               by <a href="">{post.author}</a>
                           </p>
                           <hr />
-                          <p>
+                          <div>
                             Vote score <span className="badge"> {post.voteScore}</span>
-                            <button type="button" className="btn btn-danger btn-xs pull-right"> Delete post <span className="glyphicon glyphicon-trash"></span></button>
-                            <button type="button" className="btn btn-warning btn-xs pull-right"> Edit post </button>  
-                          </p>
+                            <button type="button" className="btn btn-primary btn-xs">
+                              Upvote | <span className="glyphicon glyphicon-plus"></span>
+                            </button>
+                            <button type="button" className="btn btn-primary btn-xs">
+                              Downvote | <span className="glyphicon glyphicon-minus"></span>
+                            </button>
+                            <button type="button" className="btn btn-danger btn-xs pull-right">
+                              Delete post |
+                              <span className="glyphicon glyphicon-trash"></span>
+                            </button>
+                            <button type="button" className="btn btn-warning btn-xs pull-right">Edit post</button>  
+                          </div>
                           <hr />
                           <p><span className="glyphicon glyphicon-time"></span> Posted on {(new Date(post.timestamp)).toString()}</p>
                           <hr />
@@ -288,12 +315,18 @@ const fetchComments = (posts) => dispatch => (
 const postPost = (post) => dispatch => (
   API
     .createPost(post)
-    .then(dispatch(fetchPosts()))
+    // .then(dispatch(fetchPosts()))
 );
 
 const postComment = (comment) => dispatch => (
   API
     .createComment(comment)
+    .then(dispatch(fetchPosts()))
+);
+
+const deletePost = (id) => dispatch => (
+  API
+    .deletePost(id)
     .then(dispatch(fetchPosts()))
 );
 
