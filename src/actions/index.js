@@ -7,15 +7,19 @@ export const DELETE_COMMENT = 'DELETE_COMMMENT'
 export const RECEIVE_CATEGORY = 'RECEIVE_CATEGORY'
 export const RECEIVE_POSTS = 'RECEIVE_POSTS'
 export const RECEIVE_COMMENTS = 'RECEIVE_COMMENTS'
+export const UP_VOTE_POST = 'UP_VOTE_POST'
+export const DOWN_VOTE_POST = 'DOWN_VOTE_POST'
+export const UP_VOTE_COMMENT = 'UP_VOTE_COMMENT'
+export const DOWN_VOTE_COMMENT = 'DOWN_VOTE_COMMENT'
 
-export function receiveCategories( categories ){
+export function receiveCategories( categories ) {
 	return {
 		type : RECEIVE_CATEGORY,
 		categories
 	}
 }
 
-export function receivePosts( posts ){
+export function receivePosts( posts ) {
 	return {
 		type : RECEIVE_POSTS,
 		posts
@@ -33,6 +37,20 @@ export function addPost({ id, timestamp, title, body, author, category, voteScor
 		category, 
 		voteScore, 
 		deleted
+	}
+}
+
+export function upVotePost({ id }) {
+	return {
+		type : UP_VOTE_POST,
+		id
+	}
+}
+
+export function downVotePost({ id }) {
+	return {
+		type : DOWN_VOTE_POST,
+		id
 	}
 }
 
@@ -75,6 +93,20 @@ export function addComment({ id, parentId, timestamp, body, author, voteScore, d
 		voteScore, 
 		deleted, 
 		parentDeleted
+	}
+}
+
+export function upVoteComment({ id }) {
+	return {
+		type : UP_VOTE_COMMENT,
+		id
+	}
+}
+
+export function downVoteComment({ id }) {
+	return {
+		type : DOWN_VOTE_COMMENT,
+		id
 	}
 }
 
