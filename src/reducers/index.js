@@ -1,3 +1,4 @@
+import { snackbarReducer } from 'react-redux-snackbar';
 import { combineReducers } from 'redux'
 
 import {
@@ -9,7 +10,11 @@ import {
 	EDIT_POST,
 	EDIT_COMMENT,
 	DELETE_POST, 
-	DELETE_COMMENT 
+	DELETE_COMMENT,
+	UP_VOTE_POST,
+	DOWN_VOTE_POST,
+	UP_VOTE_COMMENT,
+	DOWN_VOTE_COMMENT 
 } from '../actions'
 
 function category (state = {}, action) {
@@ -45,6 +50,8 @@ function post (state = {}, action) {
 
 	const { id, timestamp, title, body, author, category, voteScore, deleted, posts } = action
 
+	console.log(action)
+
 	switch(action.type){
 		case RECEIVE_POSTS:
 			let result = posts.reduce((obj,item) => {
@@ -67,6 +74,28 @@ function post (state = {}, action) {
 					category, 
 					voteScore, 
 					deleted
+				}
+			}
+		case UP_VOTE_POST:
+
+			const upVoteScore = parseInt(state[id]['voteScore'], 10) + 1
+
+			return {
+				...state,
+				[id]: {
+					...state[id],
+					voteScore: upVoteScore
+				}
+			}
+		case DOWN_VOTE_POST:
+
+			const downVoteScore = parseInt(state[id]['voteScore'], 10) - 1
+
+			return {
+				...state,
+				[id]: {
+					...state[id],
+					voteScore: downVoteScore
 				}
 			}
 		case EDIT_POST:
@@ -109,32 +138,11 @@ function post (state = {}, action) {
  * parentDeleted Boolean Flag for when the the parent post was deleted, but the comment itself was not.
  */
 
-const initialComments = {
-  "894tuq4ut84ut8v4t8wun89g": {
-    id: '894tuq4ut84ut8v4t8wun89g',
-    parentId: "8xf0y6ziyjabvozdd253nd",
-    timestamp: 1468166872634,
-    body: 'Hi there! I am a COMMENT.',
-    author: 'thingtwo',
-    voteScore: 6,
-    deleted: false,
-    parentDeleted: false 
-  },
-  "8tu4bsun805n8un48ve89": {
-    id: '8tu4bsun805n8un48ve89',
-    parentId: "8xf0y6ziyjabvozdd253nd",
-    timestamp: 1469479767190,
-    body: 'Comments. Are. Cool.',
-    author: 'thingone',
-    voteScore: -5,
-    deleted: false,
-    parentDeleted: false
-  }
-}
-
 function comment (state = {}, action) {
+
 	const { id, parentId, timestamp, body, author, voteScore, deleted, parentDeleted, comments } = action
-	switch(action.type){
+
+	switch(action.type) {
 		case RECEIVE_COMMENTS:
 			let result = comments.reduce((obj,item) => {
   							obj[item.id] = item; 
@@ -145,11 +153,64 @@ function comment (state = {}, action) {
 				...result
 			}
 		case ADD_COMMENT:
-			return state
+			return {
+				...state,
+				[id]:{
+					id, 
+					parentId, 
+					timestamp, 
+					body, 
+					author, 
+					voteScore, 
+					deleted, 
+					parentDeleted
+				}
+
+			}
+		case UP_VOTE_COMMENT:
+
+			const upVoteScore = parseInt(state[id]['voteScore'], 10) + 1
+
+			return {
+				...state,
+				[id]: {
+					...state[id],
+					voteScore: upVoteScore
+				}
+			}
+		case DOWN_VOTE_COMMENT:
+
+			const downVoteScore = parseInt(state[id]['voteScore'], 10) - 1
+
+			return {
+				...state,
+				[id]: {
+					...state[id],
+					voteScore: downVoteScore
+				}
+			}
 		case EDIT_COMMENT:
-			return state
+			return {
+				...state,
+				[id]: {
+					id,
+					timestamp, 
+					body, 
+					author, 
+					parentId, 
+					voteScore, 
+					deleted,
+					parentDeleted
+				}
+			}
 		case DELETE_COMMENT:
-			return state
+			return {
+				...state,
+				[id]: {
+					...state[id],
+					deleted: true
+				}
+			}
 		default:
 			return state;
 	}
@@ -158,5 +219,6 @@ function comment (state = {}, action) {
 export default combineReducers({
 	category,
 	post,
-	comment
+	comment,
+	snackbar: snackbarReducer
 })
