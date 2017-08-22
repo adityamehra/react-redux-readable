@@ -1,7 +1,4 @@
-
-
 const api = "http://localhost:5001"
-
 
 // Generate a unique token for storing your bookshelf data on the backend server.
 let token = localStorage.token
@@ -14,6 +11,7 @@ const headers = {
   'Authorization': token
 }
 
+// API calls to localhost
 export const getAllCategories = () => 
 	fetch(`${api}/categories`, { headers })
 		.then(res => res.json())
@@ -36,6 +34,32 @@ export const createPost = (body) =>
 		body: JSON.stringify(body)
 	}).then(res => res.json)
 
+export const upVotePost = (id) => 
+	fetch(`${api}/posts/${id}`, {
+		method: 'POST',
+		headers: {
+			...headers,
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({option: 'upVote'})
+	}).then(res => res.json)
+
+export const downVotePost = (id) => 
+	fetch(`${api}/posts/${id}`, {
+		method: 'POST',
+		headers: {
+			...headers,
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({option: 'downVote'})
+	}).then(res => res.json)
+
+export const deletePost = (id) =>
+	fetch(`${api}/posts/${id}`, {
+		method: 'DELETE',
+		headers: { ...headers }
+	}).then(res => res.json)
+
 export const createComment = (body) =>
 	fetch(`${api}/comments`, {
 		method: 'POST',
@@ -45,3 +69,33 @@ export const createComment = (body) =>
 		},
 		body: JSON.stringify(body)
 	}).then(res => res.json)
+
+export const upVoteComment = (id) => 
+	fetch(`${api}/comments/${id}`, {
+		method: 'POST',
+		headers: {
+			...headers,
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({option: 'upVote'})
+	}).then(res => res.json)
+
+export const downVoteComment = (id) => 
+	fetch(`${api}/comments/${id}`, {
+		method: 'POST',
+		headers: {
+			...headers,
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({option: 'downVote'})
+	}).then(res => res.json)
+
+export const deleteComment = (id) =>
+	fetch(`${api}/comments/${id}`, {
+		method: 'DELETE',
+		headers: { ...headers }
+	}).then(res => res.json)
+
+
+
+
