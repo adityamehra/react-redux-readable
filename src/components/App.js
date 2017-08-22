@@ -1,15 +1,24 @@
 import React, { Component } from 'react'
 import { Route, Link } from 'react-router-dom'
 import { connect } from 'react-redux'
-import { addPost, receiveCategories, receivePosts, receiveComments } from '../actions'
-import './App.css'
+import { 
+  receiveCategories,
+  receivePosts,
+  addPost, 
+  upVotePost, 
+  downVotePost,
+  deletePost,
+  addComment,
+  upVoteComment, 
+  downVoteComment,  
+  deleteComment, 
+  receiveComments 
+} from '../actions'
 import serializeForm from 'form-serialize'
 import { Snackbar } from 'react-redux-snackbar';
 import { showSnack, dismissSnack } from 'react-redux-snackbar';
-
-
-
 import * as API from '../utils/api'
+import './App.css'
 
 class App extends Component {
 
@@ -26,7 +35,7 @@ class App extends Component {
     }));
   }
 
-  handlePostSubmit = (e) => {
+  handleSubmitPost = (e) => {
     e.preventDefault()
     const values = serializeForm(e.target, { hash: true })
     const post = {
@@ -40,10 +49,26 @@ class App extends Component {
       deleted: false 
     }
     this.props.dispatch(postPost(post))
+    // window.location.href="/"
     this.showSnackBar(Math.random().toString(36).substr(-8), "Post added!")
   }
 
-  handleCommentSubmit = (postId) => (e) => {
+  handleUpVotePost = (id) => {
+    this.props.dispatch(upVotePost_wrapper(id))
+  }
+
+  handleDownVotePost = (id) => {
+    this.props.dispatch(downVotePost_wrapper(id))
+  }
+
+  handleDeletePost = (id) => {
+    this.props.dispatch(removePost(id))
+    this.showSnackBar(Math.random().toString(36).substr(-8), "Post deleted!")
+    window.location.href="/"
+    // console.log("handleDeletePost" + id )
+  }
+
+  handleSubmitComment = (postId) => (e) => {
     e.preventDefault()
     const values = serializeForm(e.target, { hash: true })
     const comment = {
@@ -57,10 +82,21 @@ class App extends Component {
       parentDeleted: false 
     }
     this.props.dispatch(postComment(comment))
+    this.showSnackBar(Math.random().toString(36).substr(-8), "Comment added!")
   }
 
-  handleDeletePost = (id) => {
-    this.props.dispatch(deletePost(id))
+  handleUpVoteComment = (id) => {
+    this.props.dispatch(upVoteComment_wrapper(id))
+  }
+
+  handleDownVoteComment = (id) => {
+    this.props.dispatch(downVoteComment_wrapper(id))
+  }
+
+  handleDeleteComment = (id) => {
+    this.props.dispatch(removeComment(id))
+    this.showSnackBar(Math.random().toString(36).substr(-8), "Comment deleted!")
+    console.log("handleDeleteComment " + id )
   }
   
 
@@ -69,8 +105,8 @@ class App extends Component {
       <div className="App">
         <Snackbar />
         <Route exact path='/' render={() => (
-          <div className="container">
-            <div className="row">
+          <div>
+            <div className="container-fluid">
               <nav className="navbar navbar-inverse">
                 <div className="container-fluid">
                   <div className="navbar-header">
@@ -89,41 +125,51 @@ class App extends Component {
                       <li className="dropdown">
                         <a href="#" className="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Categories<span className="caret"></span></a>
                         <ul className="dropdown-menu">
-                          <li><a href="#">Action</a></li>
-                          <li><a href="#">Another action</a></li>
-                          <li><a href="#">Something else here</a></li>
-                          <li role="separator" className="divider"></li>
-                          <li><a href="#">Separated link</a></li>
-                          <li role="separator" className="divider"></li>
-                          <li><a href="#">One more separated link</a></li>
+                          {this.props.category.map(category => <li key={category.name}><a href={`/${category.name}/posts`}>{category.name}</a></li>)}
                         </ul>
                       </li>
                     </ul>
                   </div>
                 </div>
               </nav>
-              <div className="col-md-6">
-                  {this.props.category.map((category) => (
-                    <div className="category-border" key={category.name}>
-                      <h2>
-                        <a href={`/${category.name}/posts`}>{category.name}</a>
-                      </h2>
-                      <a className="btn btn-success btn-xs" href={`/${category.name}/newPost`}> Write new post <span className="glyphicon glyphicon-pencil"></span> </a>
-                      <ul>
-                        {this.props.post.map((post) => {
-                          if(post.category === category.name && !post.deleted){
-                            return (<li key={post.id}>
-                                      <h3><a href={`/post/${post.id}`}>{post.title}</a> <span className="label label-primary">{post.voteScore}</span></h3>
-                                    </li>)
-                          }
-                          return null;
-                        })}
-                      </ul>
-                    </div>
-                  ))}
-                <button className="btn btn-primary" onClick ={() => this.props.dispatch(addPost(this.post))}>
-                  Test
-                </button>
+            </div>
+            <div className="container">
+              <div className="col-md-8">
+                {this.props.category.map((category) => (
+                  <div className="category-box" key={category.name}>
+                    <h2>
+                      <a href={`/${category.name}/posts`}>{category.name}</a>
+                    </h2>
+                    <a className="btn btn-success btn-xs" href={`/${category.name}/newPost`}> Write new post <span className="glyphicon glyphicon-pencil"></span> </a>
+                    <hr />
+                    <ul>
+                      {this.props.post.map((post) => {
+                        if(post.category === category.name && !post.deleted) {
+                          return (
+                            <div key={post.id}>
+                              <li>
+                                <h3>
+                                  <a href={`/post/${post.id}`}>{post.title}</a>
+                                  <span className="label label-default">{post.voteScore}</span>
+                                </h3>
+                                <div>
+                                  <button type="button" onClick={() => this.handleUpVotePost(post.id)}>
+                                    <span className="glyphicon glyphicon-thumbs-up"></span>
+                                  </button>
+                                  <button type="button" onClick={() => this.handleDownVotePost(post.id)}>
+                                    <span className="glyphicon glyphicon-thumbs-down"></span>
+                                  </button>
+                                </div>
+                              </li>
+                              <hr />
+                            </div>
+                          )
+                        }
+                        return null;
+                      })}
+                    </ul>
+                  </div>
+                ))}
               </div>
             </div>
           </div>
@@ -132,20 +178,67 @@ class App extends Component {
           const category =  match.params.category
           return (
             <div>
-              <h2>
-               {category}
-              </h2>
-              <a className="btn btn-success btn-xs" href={`/${category}/newPost`}> Write new post <span className="glyphicon glyphicon-pencil"></span></a>
-              <ol>
-                {this.props.post.map((post) => {
-                  if(post.category === category){
-                    return (<li key={post.id}>
-                              <h3>{post.title} <span className="label label-primary">{post.voteScore}</span></h3>
-                            </li>)
-                  }
-                  return null;
-                })}
-              </ol>
+              <div className="container-fluid">
+                <nav className="navbar navbar-inverse">
+                  <div className="container-fluid">
+                    <div className="navbar-header">
+                      <button type="button" className="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                        <span className="sr-only">Toggle navigation</span>
+                        <span className="icon-bar"></span>
+                        <span className="icon-bar"></span>
+                        <span className="icon-bar"></span>
+                      </button>
+                      <a className="navbar-brand" href="/">Readable</a>
+                    </div>
+                    <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                      <ul className="nav navbar-nav">
+                        <li><a href="#">Link <span className="sr-only">(current)</span></a></li>
+                        <li><a href="#">Link</a></li>
+                        <li className="dropdown">
+                          <a href="#" className="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Categories<span className="caret"></span></a>
+                          <ul className="dropdown-menu">
+                            {this.props.category.map(category => <li key={category.name}><a href={`/${category.name}/posts`}>{category.name}</a></li>)}
+                          </ul>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </nav>
+              </div>
+              <div className="container">
+                <div className="col-md-6">
+                  <h2>
+                   {category}
+                  </h2>
+                  <a className="btn btn-success btn-xs" href={`/${category}/newPost`}> Write new post <span className="glyphicon glyphicon-pencil"></span></a>
+                  <ul>
+                    {this.props.post.map((post) => {
+                      if(post.category === category && !post.deleted) {
+                        return (
+                          <div key={post.id}>
+                            <li>
+                              <h3>
+                                <a href={`/post/${post.id}`}>{post.title}</a>
+                                <span className="label label-default">{post.voteScore}</span>
+                              </h3>
+                              <div>
+                                <button type="button" onClick={() => this.handleUpVotePost(post.id)}>
+                                  <span className="glyphicon glyphicon-thumbs-up"></span>
+                                </button>
+                                <button type="button" onClick={() => this.handleDownVotePost(post.id)}>
+                                  <span className="glyphicon glyphicon-thumbs-down"></span>
+                                </button>
+                              </div>
+                            </li>
+                            <hr />
+                          </div>
+                        )
+                      }
+                      return null;
+                    })}
+                  </ul>
+                </div>
+              </div>
             </div>
           )
         }}/>
@@ -156,72 +249,108 @@ class App extends Component {
               {this.props.post.map((post) => {
                 if(post.id === postId){
                   return (
-                    <div className="container" key={post.id}>
-                      <div className="row">
-                        <div className="col-md-6">
-                          <h1>{post.title}</h1>
-                          <p className="lead">
-                              by <a href="">{post.author}</a>
-                          </p>
-                          <hr />
-                          <div>
-                            Vote score <span className="badge"> {post.voteScore}</span>
-                            <button type="button" className="btn btn-primary btn-xs">
-                              Upvote | <span className="glyphicon glyphicon-plus"></span>
+                    <div key={post.id}>
+                      <div className="container-fluid" key={post.id}>
+                      <nav className="navbar navbar-inverse">
+                        <div className="container-fluid">
+                          <div className="navbar-header">
+                            <button type="button" className="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                              <span className="sr-only">Toggle navigation</span>
+                              <span className="icon-bar"></span>
+                              <span className="icon-bar"></span>
+                              <span className="icon-bar"></span>
                             </button>
-                            <button type="button" className="btn btn-primary btn-xs">
-                              Downvote | <span className="glyphicon glyphicon-minus"></span>
-                            </button>
-                            <button type="button" className="btn btn-danger btn-xs pull-right">
-                              Delete post |
-                              <span className="glyphicon glyphicon-trash"></span>
-                            </button>
-                            <button type="button" className="btn btn-warning btn-xs pull-right">Edit post</button>  
+                            <a className="navbar-brand" href="/">Readable</a>
                           </div>
-                          <hr />
-                          <p><span className="glyphicon glyphicon-time"></span> Posted on {(new Date(post.timestamp)).toString()}</p>
-                          <hr />
-                          <p className="lead">{post.body}</p>
-                          <hr />
-                          <h4>Comments</h4>
-                          <div className="well">
-                            <h4>Leave a Comment:</h4>
-                            <form onSubmit={this.handleCommentSubmit(postId)}>
-                                <div className="form-group">
-                                     <input type="text" name="author" className="form-control" placeholder="Author" />
-                                </div>
-                                <div className="form-group">
-                                    <textarea type="text" name="comment" className="form-control" rows="3" placeholder="Comment"></textarea>
-                                </div>
-    
-                                <button className="btn btn-primary">Comment</button>
-                            </form>
-                          </div>
-                          <hr />
-                          <div>
-                            {this.props.comment.map((comment) => {
-                              if(comment.parentId === post.id){
-                                return (
-                                  <div className="media" key={comment.id}>
-                                    <a className="pull-left" href="">
-                                      <img className="media-object" src="http://placehold.it/64x64" alt="" />
-                                    </a>
-                                    <div className="media-body">
-                                        <h4 className="media-heading">{comment.author}  <small>{(new Date(comment.timestamp)).toString()}</small>
-                                        </h4>
-                                        <p>{comment.body}</p>
-                                        <a><span>Upvote</span> | <span>{comment.voteScore}</span></a>
-                                        <button type="button" className="btn btn-danger btn-xs pull-right"><span className="glyphicon glyphicon-trash"></span></button>
-                                        <button type="button" className="btn btn-warning btn-xs pull-right"> Edit </button>
-                                    </div>
-                                  </div>
-                                )
-                              }
-                              return null;
-                            })}
+                          <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                            <ul className="nav navbar-nav">
+                              <li><a href="#">Link <span className="sr-only">(current)</span></a></li>
+                              <li><a href="#">Link</a></li>
+                              <li className="dropdown">
+                                <a href="#" className="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Categories<span className="caret"></span></a>
+                                <ul className="dropdown-menu">
+                                  {this.props.category.map(category => <li key={category.name}><a href={`/${category.name}/posts`}>{category.name}</a></li>)}
+                                </ul>
+                              </li>
+                            </ul>
                           </div>
                         </div>
+                      </nav>
+                    </div>
+                    <div className="container">
+                      <div className="col-md-6">
+                        <h1>{post.title}</h1>
+                        <p className="lead">
+                            by <a href="">{post.author}</a>
+                        </p>
+                        <hr />
+                        <div>
+                          Vote score <span className="badge"> {post.voteScore}</span>
+                          <button type="button" className="" onClick={() => this.handleUpVotePost(post.id)}>
+                            <span className="glyphicon glyphicon-thumbs-up"></span>
+                          </button>
+                          <button type="button" className="" onClick={() => this.handleDownVotePost(post.id)}>
+                            <span className="glyphicon glyphicon-thumbs-down"></span>
+                          </button>
+                          <button type="button" className="pull-right" onClick={() => this.handleDeletePost(post.id)}>
+                            <span className="glyphicon glyphicon-trash"></span>
+                          </button>
+                          <button type="button" className="pull-right">
+                            <span className="glyphicon glyphicon-edit"></span>
+                          </button>  
+                        </div>
+                        <hr />
+                        <p><span className="glyphicon glyphicon-time"></span> Posted on {(new Date(post.timestamp)).toString()}</p>
+                        <hr />
+                        <p className="lead">{post.body}</p>
+                        <hr />
+                        <h4>Comments</h4>
+                        <div className="well">
+                          <h4>Leave a Comment:</h4>
+                          <form onSubmit={this.handleSubmitComment(postId)}>
+                              <div className="form-group">
+                                   <input type="text" name="author" className="form-control" placeholder="Author" />
+                              </div>
+                              <div className="form-group">
+                                  <textarea type="text" name="comment" className="form-control" rows="3" placeholder="Comment"></textarea>
+                              </div>
+  
+                              <button className="btn btn-primary">Comment</button>
+                          </form>
+                        </div>
+                        <hr />
+                        <div>
+                          {this.props.comment.map((comment) => {
+                            if(comment.parentId === post.id && !comment.deleted){
+                              return (
+                                <div className="media" key={comment.id}>
+                                  <a className="pull-left" href="">
+                                    <img className="media-object" src="http://placehold.it/64x64" alt="" />
+                                  </a>
+                                  <div className="media-body">
+                                      <h4 className="media-heading">{comment.author}  <small>{(new Date(comment.timestamp)).toString()}</small>
+                                      </h4>
+                                      <p>{comment.body}</p>
+                                      <a>
+                                        Vote score <span className="badge">{comment.voteScore}</span>
+                                        <button type="button" className="btn btn-primary btn-xs" onClick={() => this.handleUpVoteComment(comment.id)}>
+                                          <span className="glyphicon glyphicon-thumbs-up"></span>
+                                        </button>
+                                        <button type="button" className="btn btn-primary btn-xs" onClick={() => this.handleDownVoteComment(comment.id)}>
+                                          <span className="glyphicon glyphicon-thumbs-down"></span>
+                                        </button>
+                                      </a>
+                                      <button type="button" className="btn btn-danger btn-xs pull-right" onClick={() => this.handleDeleteComment(comment.id)}><span className="glyphicon glyphicon-trash"></span></button>
+                                      <button type="button" className="btn btn-warning btn-xs pull-right"> Edit </button>
+                                  </div>
+                                </div>
+                              )
+                            }
+                            return null;
+                          })}
+                        </div>
                       </div>
+                    </div>
                     </div>
                   )
                 }
@@ -233,10 +362,37 @@ class App extends Component {
         <Route path='/:category/newPost' render={({match}) => {
           // const category = match.params.category
           return (
-            <div className="container">
-              <div className="row">
+            <div>
+              <div className="container-fluid">
+                <nav className="navbar navbar-inverse">
+                  <div className="container-fluid">
+                    <div className="navbar-header">
+                      <button type="button" className="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                        <span className="sr-only">Toggle navigation</span>
+                        <span className="icon-bar"></span>
+                        <span className="icon-bar"></span>
+                        <span className="icon-bar"></span>
+                      </button>
+                      <a className="navbar-brand" href="/">Readable</a>
+                    </div>
+                    <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                      <ul className="nav navbar-nav">
+                        <li><a href="#">Link <span className="sr-only">(current)</span></a></li>
+                        <li><a href="#">Link</a></li>
+                        <li className="dropdown">
+                          <a href="#" className="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Categories<span className="caret"></span></a>
+                          <ul className="dropdown-menu">
+                            {this.props.category.map(category => <li key={category.name}><a href={`/${category.name}/posts`}>{category.name}</a></li>)}
+                          </ul>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </nav>
+              </div>
+              <div className="container">
                 <div className="col-md-6">
-                  <form onSubmit={this.handlePostSubmit}>
+                  <form onSubmit={this.handleSubmitPost}>
                     <div className="form-group">
                       <label>Title</label>
                       <input type="text" name="title" className="form-control" id="exampleInputEmail1" placeholder="Title" />
@@ -321,13 +477,44 @@ const postPost = (post) => dispatch => (
 const postComment = (comment) => dispatch => (
   API
     .createComment(comment)
-    .then(dispatch(fetchPosts()))
+    // .then(dispatch(fetchPosts()))
+    .then(() => dispatch(addComment(comment)))
 );
 
-const deletePost = (id) => dispatch => (
+const upVotePost_wrapper = (id) => dispatch => (
+  API
+    .upVotePost(id)
+    .then(() => dispatch(upVotePost({id})))
+);
+
+const downVotePost_wrapper = (id) => dispatch => (
+  API
+    .downVotePost(id)
+    .then(() => dispatch(downVotePost({id})))
+);
+
+const removePost = (id) => dispatch => (
   API
     .deletePost(id)
-    .then(dispatch(fetchPosts()))
+    .then(id => dispatch(deletePost({ id })))
+);
+
+const removeComment = (id) => dispatch => (
+  API
+    .deleteComment(id)
+    .then(() => dispatch(deleteComment({id})))
+);
+
+const upVoteComment_wrapper = (id) => dispatch => (
+  API
+    .upVoteComment(id)
+    .then(() => dispatch(upVoteComment({id})))
+);
+
+const downVoteComment_wrapper = (id) => dispatch => (
+  API
+    .downVoteComment(id)
+    .then(() => dispatch(downVoteComment({id})))
 );
 
 export default connect(mapStateToProps)(App);
