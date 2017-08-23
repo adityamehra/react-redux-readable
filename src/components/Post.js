@@ -1,77 +1,169 @@
 import React, { Component } from 'react'
 
+import {
+  fetchComments,
+  upVotePost_wrapper,
+  downVotePost_wrapper,
+  deletePost_wrapper,
+  postComment,
+  upVoteComment_wrapper,
+  downVoteComment_wrapper,
+  deleteComment_wrapper
+} from '../utils/api_thunk_wrapper.js'
+
+import serializeForm from 'form-serialize'
+import { showSnack, dismissSnack } from 'react-redux-snackbar';
+import './App.css'
+
 class Post extends Component {
+
+  componentDidMount(){
+    this.props.dispatch(fetchComments(this.props.postId))
+    
+  }
+
+  showSnackBar = (id, label) => {
+    this.props.dispatch(showSnack(id, {
+      label: label,
+      timeout: 3000,
+      button: { label: 'OK' }
+    }));
+  }
+
+  handleUpVotePost = (id) => {
+      this.props.dispatch(upVotePost_wrapper(id))
+  }
+
+  handleDownVotePost = (id) => {
+      this.props.dispatch(downVotePost_wrapper(id))
+  } 
+
+  handleDeletePost = (id) => {
+    this.props.dispatch(deletePost_wrapper(id))
+    this.showSnackBar(Math.random().toString(36).substr(-8), "Post deleted!")
+    window.location.href="/"
+  }
+
+  handleSubmitComment = (postId) => (e) => {
+    e.preventDefault()
+    const values = serializeForm(e.target, { hash: true })
+    const comment = {
+      id: Math.random().toString(36).substr(-8),
+      parentId: postId,
+      timestamp: Date.now(),
+      body: values.comment,
+      author: values.author,
+      voteScore: 1,
+      deleted: false,
+      parentDeleted: false 
+    }
+    this.props.dispatch(postComment(comment))
+    this.showSnackBar(Math.random().toString(36).substr(-8), "Comment added!")
+  }
+
+  handleUpVoteComment = (id) => {
+    this.props.dispatch(upVoteComment_wrapper(id))
+  }
+
+  handleDownVoteComment = (id) => {
+    this.props.dispatch(downVoteComment_wrapper(id))
+  }
+
+  handleDeleteComment = (id) => {
+    this.props.dispatch(deleteComment_wrapper(id))
+    this.showSnackBar(Math.random().toString(36).substr(-8), "Comment deleted!")
+    console.log("handleDeleteComment " + id )
+  }
+
 	render() {
+        console.log(this.props)
+        const postId = this.props.postId
         return (
-            <div className="container">
-                <div className="row">
-                    <div className="col-lg-8">
-                        <h1>Blog Post Title</h1>
-                        <p className="lead">
-                            by <a href="#">Start Bootstrap</a>
-                        </p>
-                        <hr />
-                        <p><span className="glyphicon glyphicon-time"></span> Posted on August 24, 2013 at 9:00 PM</p>
-                        <hr />
-                        <p className="lead">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ducimus, vero, obcaecati, aut, error quam sapiente nemo saepe quibusdam sit excepturi nam quia corporis eligendi eos magni recusandae laborum minus inventore?</p>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Ut, tenetur natus doloremque laborum quos iste ipsum rerum obcaecati impedit odit illo dolorum ab tempora nihil dicta earum fugiat. Temporibus, voluptatibus.</p>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Eos, doloribus, dolorem iusto blanditiis unde eius illum consequuntur neque dicta incidunt ullam ea hic porro optio ratione repellat perspiciatis. Enim, iure!</p>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Error, nostrum, aliquid, animi, ut quas placeat totam sunt tempora commodi nihil ullam alias modi dicta saepe minima ab quo voluptatem obcaecati?</p>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Harum, dolor quis. Sunt, ut, explicabo, aliquam tenetur ratione tempore quidem voluptates cupiditate voluptas illo saepe quaerat numquam recusandae? Qui, necessitatibus, est!</p>
-                        <hr />
-                        <div className="well">
+            <div>
+              {this.props.post.map((post) => {
+                if(post.id === postId){
+                  return (
+                    <div key={post.id}>
+                      <div className="container-fluid">
+                      </div>
+                      <div className="container">
+                        <div className="col-md-6">
+                          <h1>{post.title}</h1>
+                          <p className="lead">
+                              by <a href="">{post.author}</a>
+                          </p>
+                          <hr />
+                          <div>
+                            Vote score <span className="label label-default"> {post.voteScore}</span>
+                            <button type="button" className="" onClick={() => this.handleUpVotePost(post.id)}>
+                              <span className="glyphicon glyphicon-thumbs-up"></span>
+                            </button>
+                            <button type="button" className="" onClick={() => this.handleDownVotePost(post.id)}>
+                              <span className="glyphicon glyphicon-thumbs-down"></span>
+                            </button>
+                            <button type="button" className="pull-right" onClick={() => this.handleDeletePost(post.id)}>
+                              <span className="glyphicon glyphicon-trash"></span>
+                            </button>
+                            <button type="button" className="pull-right">
+                              <span className="glyphicon glyphicon-edit"></span>
+                            </button>  
+                          </div>
+                          <hr />
+                          <p><span className="glyphicon glyphicon-time"></span> Posted on {(new Date(post.timestamp)).toString()}</p>
+                          <hr />
+                          <p className="lead">{post.body}</p>
+                          <hr />
+                          <h4>Comments</h4>
+                          <div className="well">
                             <h4>Leave a Comment:</h4>
-                            <form role="form">
+                            <form onSubmit={this.handleSubmitComment(postId)}>
                                 <div className="form-group">
-                                    <textarea className="form-control" rows="3"></textarea>
+                                     <input type="text" name="author" className="form-control" placeholder="Author" />
                                 </div>
-                                <button type="submit" className="btn btn-primary">Submit</button>
+                                <div className="form-group">
+                                    <textarea type="text" name="comment" className="form-control" rows="3" placeholder="Comment"></textarea>
+                                </div>
+                                <button className="btn btn-black">Comment</button>
                             </form>
-                        </div>
-                        <hr />
-                        <div className="media">
-                            <a className="pull-left" href="#">
-                                <img className="media-object" src="http://placehold.it/64x64" alt="" />
-                            </a>
-                            <div className="media-body">
-                                <h4 className="media-heading">Start Bootstrap
-                                    <small>August 25, 2014 at 9:30 PM</small>
-                                </h4>
-                                Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin commodo. Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
-                            </div>
-                        </div>
-                        <div className="media">
-                            <a className="pull-left" href="#">
-                                <img className="media-object" src="http://placehold.it/64x64" alt="" />
-                            </a>
-                            <div className="media-body">
-                                <h4 className="media-heading">Start Bootstrap
-                                    <small>August 25, 2014 at 9:30 PM</small>
-                                </h4>
-                                Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin commodo. Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
-                                <div className="media">
-                                    <a className="pull-left" href="#">
-                                        <img className="media-object" src="http://placehold.it/64x64" alt="" />
+                          </div>
+                          <hr />
+                          <div>
+                            {this.props.comment.map((comment) => {
+                              if(comment.parentId === post.id && !comment.deleted) {
+                                return (
+                                  <div className="media" key={comment.id}>
+                                    <a className="pull-left" href="">
+                                      <img className="media-object" src="http://placehold.it/64x64" alt="" />
                                     </a>
                                     <div className="media-body">
-                                        <h4 className="media-heading">Nested Start Bootstrap
-                                            <small>August 25, 2014 at 9:30 PM</small>
+                                        <h4 className="media-heading">{comment.author}  <small>{(new Date(comment.timestamp)).toString()}</small>
                                         </h4>
-                                        Cras sit amet nibh libero, in gravida nulla. Nulla vel metus scelerisque ante sollicitudin commodo. Cras purus odio, vestibulum in vulputate at, tempus viverra turpis. Fusce condimentum nunc ac nisi vulputate fringilla. Donec lacinia congue felis in faucibus.
+                                        <p>{comment.body}</p>
+                                        <a>
+                                          Vote score <span className="badge">{comment.voteScore}</span>
+                                          <button type="button" className="btn btn-primary btn-xs" onClick={() => this.handleUpVoteComment(comment.id)}>
+                                            <span className="glyphicon glyphicon-thumbs-up"></span>
+                                          </button>
+                                          <button type="button" className="btn btn-primary btn-xs" onClick={() => this.handleDownVoteComment(comment.id)}>
+                                            <span className="glyphicon glyphicon-thumbs-down"></span>
+                                          </button>
+                                        </a>
+                                        <button type="button" className="btn btn-danger btn-xs pull-right" onClick={() => this.handleDeleteComment(comment.id)}><span className="glyphicon glyphicon-trash"></span></button>
+                                        <button type="button" className="btn btn-warning btn-xs pull-right"> Edit </button>
                                     </div>
-                                </div>
-                            </div>
+                                  </div>
+                                )
+                              }
+                              return null;
+                            })}
+                          </div>
                         </div>
+                      </div>
                     </div>
-                </div>
-                <hr />
-                <footer>
-                    <div className="row">
-                        <div className="col-lg-12">
-                            <p>Copyright &copy; Your Website 2014</p>
-                        </div>
-                    </div>
-                </footer>
+                  )
+                }
+                return null;
+              })}
             </div>
         )
 	}
