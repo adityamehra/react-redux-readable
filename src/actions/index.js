@@ -11,6 +11,8 @@ export const UP_VOTE_POST = 'UP_VOTE_POST'
 export const DOWN_VOTE_POST = 'DOWN_VOTE_POST'
 export const UP_VOTE_COMMENT = 'UP_VOTE_COMMENT'
 export const DOWN_VOTE_COMMENT = 'DOWN_VOTE_COMMENT'
+export const SORT_BY_UP_VOTE = 'SORT_BY_UP_VOTE'
+export const SORT_BY_DOWN_VOTE = 'SORT_BY_DOWN_VOTE'
 
 export function receiveCategories( categories ) {
 	return {
@@ -121,6 +123,20 @@ export function editComment({ id, parentId, timestamp, body, author, voteScore, 
 		voteScore, 
 		deleted, 
 		parentDeleted
+	}
+}
+
+export function sortByUpVoteComments( comments ){
+	return {
+		type : SORT_BY_UP_VOTE,
+		comments
+	}
+}
+
+export function sortByDownVoteComments( comments ){
+	return {
+		type : SORT_BY_DOWN_VOTE,
+		comments
 	}
 }
 
