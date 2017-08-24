@@ -1,5 +1,6 @@
 import { snackbarReducer } from 'react-redux-snackbar';
 import { combineReducers } from 'redux'
+import sortBy from 'sort-by'
 
 import {
 	RECEIVE_CATEGORY,
@@ -14,12 +15,14 @@ import {
 	UP_VOTE_POST,
 	DOWN_VOTE_POST,
 	UP_VOTE_COMMENT,
-	DOWN_VOTE_COMMENT 
+	DOWN_VOTE_COMMENT,
+	SORT_BY_UP_VOTE,
+	SORT_BY_DOWN_VOTE 
 } from '../actions'
 
 function category (state = {}, action) {
 	const { categories } = action
-	switch(action.type){
+	switch(action.type) {
 		case RECEIVE_CATEGORY:
 			let result = categories['categories'].reduce((obj,item) => {
 							obj[item.name] = item; 
@@ -49,8 +52,6 @@ function category (state = {}, action) {
 function post (state = {}, action) {
 
 	const { id, timestamp, title, body, author, category, voteScore, deleted, posts } = action
-
-	console.log(action)
 
 	switch(action.type){
 		case RECEIVE_POSTS:
@@ -138,24 +139,103 @@ function post (state = {}, action) {
  * parentDeleted Boolean Flag for when the the parent post was deleted, but the comment itself was not.
  */
 
-function comment (state = {}, action) {
+// function comment (state = {}, action) {
+
+// 	const { id, parentId, timestamp, body, author, voteScore, deleted, parentDeleted, comments } = action
+
+// 	switch(action.type) {
+// 		case RECEIVE_COMMENTS:
+// 			let result = comments.reduce((obj,item) => {
+//   							obj[item.id] = item; 
+//   							return obj;
+// 						}, {});
+// 			return {
+// 				...state,
+// 				...result
+// 			}
+// 		case ADD_COMMENT:
+// 			return {
+// 				...state,
+// 				[id]: {
+// 					id, 
+// 					parentId, 
+// 					timestamp, 
+// 					body, 
+// 					author, 
+// 					voteScore, 
+// 					deleted, 
+// 					parentDeleted
+// 				}
+
+// 			}
+// 		case UP_VOTE_COMMENT:
+
+// 			const upVoteScore = parseInt(state[id]['voteScore'], 10) + 1
+
+// 			return {
+// 				...state,
+// 				[id]: {
+// 					...state[id],
+// 					voteScore: upVoteScore
+// 				}
+// 			}
+// 		case DOWN_VOTE_COMMENT:
+
+// 			const downVoteScore = parseInt(state[id]['voteScore'], 10) - 1
+
+// 			return {
+// 				...state,
+// 				[id]: {
+// 					...state[id],
+// 					voteScore: downVoteScore
+// 				}
+// 			}
+// 		case EDIT_COMMENT:
+// 			return {
+// 				...state,
+// 				[id]: {
+// 					id,
+// 					timestamp, 
+// 					body, 
+// 					author, 
+// 					parentId, 
+// 					voteScore, 
+// 					deleted,
+// 					parentDeleted
+// 				}
+// 			}
+// 		case DELETE_COMMENT:
+// 			return {
+// 				...state,
+// 				[id]: {
+// 					...state[id],
+// 					deleted: true
+// 				}
+// 			}
+// 		case SORT_BY_UP_VOTE:
+// 			comments.sort(sortBy('voteScore'))
+// 			return comments
+
+// 		// case SORT_BY_DOWN_VOTE:
+
+// 		default:
+// 			return state;
+// 	}
+// }
+
+function comment (state = [], action) {
 
 	const { id, parentId, timestamp, body, author, voteScore, deleted, parentDeleted, comments } = action
 
 	switch(action.type) {
 		case RECEIVE_COMMENTS:
 			let result = comments.reduce((obj,item) => {
-  							obj[item.id] = item; 
+  							obj.push(item); 
   							return obj;
-						}, {});
-			return {
-				...state,
-				...result
-			}
+						}, []);
+			return state.concat(result)
 		case ADD_COMMENT:
-			return {
-				...state,
-				[id]:{
+			return (state.concat([{
 					id, 
 					parentId, 
 					timestamp, 
@@ -164,35 +244,25 @@ function comment (state = {}, action) {
 					voteScore, 
 					deleted, 
 					parentDeleted
-				}
-
-			}
+				}]))
 		case UP_VOTE_COMMENT:
-
-			const upVoteScore = parseInt(state[id]['voteScore'], 10) + 1
-
-			return {
-				...state,
-				[id]: {
-					...state[id],
-					voteScore: upVoteScore
+			console.log(state)
+			return (state.map(comment => {
+				if(comment.id === id){
+					comment['voteScore'] = parseInt(comment['voteScore'], 10) + 1
 				}
-			}
+				return comment	
+			}))
 		case DOWN_VOTE_COMMENT:
-
-			const downVoteScore = parseInt(state[id]['voteScore'], 10) - 1
-
-			return {
-				...state,
-				[id]: {
-					...state[id],
-					voteScore: downVoteScore
+			return (state.map(comment => {
+				if(comment.id == id){
+					comment['voteScore'] = parseInt(comment['voteScore'], 10) - 1
 				}
-			}
+				return comment
+			}))
 		case EDIT_COMMENT:
-			return {
-				...state,
-				[id]: {
+			return state.filter(comment => comment.id !== id).concat(
+				[{
 					id,
 					timestamp, 
 					body, 
@@ -201,20 +271,24 @@ function comment (state = {}, action) {
 					voteScore, 
 					deleted,
 					parentDeleted
-				}
-			}
+				}]
+			)
 		case DELETE_COMMENT:
-			return {
-				...state,
-				[id]: {
-					...state[id],
-					deleted: true
+			return state.map(comment => { 
+				if(comment.id === id){
+					comment.deleted = true
 				}
-			}
+				return comment
+			})
+		case SORT_BY_UP_VOTE:
+			return [...state.sort(sortBy('voteScore'))]
+		case SORT_BY_DOWN_VOTE:
+			return [...state.sort(sortBy('-voteScore'))]
 		default:
 			return state;
 	}
 }
+
 
 export default combineReducers({
 	category,
