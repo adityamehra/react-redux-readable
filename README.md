@@ -14,7 +14,7 @@ Below you will find some information on how to perform common tasks.<br>
 
 ## Backend Development Server
 
-This web app requires a backend development server. The [backend server](https://github.com/adityamehra/reactnd-project-readable-starter)
+This web app requires a [backend development server](https://github.com/adityamehra/reactnd-project-readable-starter).
 
 ## Why this project?
 This content and comment structure is common across a large number of websites and applications, from news sites to blogs to aggregators like Hacker News and Reddit. By building this project, you will gain an understanding of how Redux can function in a standard type of application.
