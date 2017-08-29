@@ -10,23 +10,29 @@ This content and comment structure is common across a large number of websites a
 ### 1. rootView_categoryList
 
 <img src="https://github.com/adityamehra/react-redux-readable/blob/master/images/rootView_categoryList.png" />
+<hr />
 
 ### 2. rootView_postList
 
 <img src="https://github.com/adityamehra/react-redux-readable/blob/master/images/rootView_postList.png" />
+<hr />
 
 ### 3. categoryView
 
 <img src="https://github.com/adityamehra/react-redux-readable/blob/master/images/categoryView.png" />
+<hr />
 
 ### 4. postView
 
 <img src="https://github.com/adityamehra/react-redux-readable/blob/master/images/postView.png" />
+<hr />
 
 ### 5. addView_post
 
 <img src="https://github.com/adityamehra/react-redux-readable/blob/master/images/addView_post.png" />
+<hr />
 
 ### 6. editView_post
 
 <img src="https://github.com/adityamehra/react-redux-readable/blob/master/images/editView_post.png" />
+<hr />
