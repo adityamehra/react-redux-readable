@@ -1,32 +1,28 @@
-import React, { Component } from 'react';
+import React from 'react'
+import { Link } from 'react-router-dom'
 
-class AllCategory extends Component {
-	render() {
-		return (
-            <div className="col-md-3">
-                <div className="thumbnail">
-                    <img className="img-responsive" src="http://placehold.it/800x300" alt=""/>
-                    <div className="caption-full">
-                        <h4><a href="#">Category 1</a>
-                        </h4>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum</p>
-                    </div>
-                </div>
-                <div className="well">
-                    <h3> 
-                    	Posts
-                    </h3>
-                    <div className="row">
-                        <div className="col-md-12">
-                            <span className="pull-right">10 days ago</span>
-                            <p>This product was great in terms of quality. I would definitely buy another!</p>
-                        </div>
-                    </div>
-                </div>
+export default function AllCategories(props) {
+  return (
+    <div className="row">
+      <h2><span className="glyphicon glyphicon-th"></span> Categories</h2>
+      <hr />
+      {props.categories.map(category => (
+        <div className="col-sm-6 col-md-4" key={category.name}>
+          <div className="thumbnail">
+            <div className="caption">
+              <h3>{category.name}</h3>
+                <p>
+                  <a href={`/${category.name}/posts`} className="btn btn-black" role="button">
+                    See more posts <span className="glyphicon glyphicon-eye-open"></span>
+                  </a> 
+                  <a href={`/newPost`} className="btn btn-black" role="button">
+                    Write new post <span className="glyphicon glyphicon-pencil"></span>
+                  </a>
+                </p>
+              </div>
             </div>
-
-		)
-	}
+        </div>
+      ))}
+    </div>
+  )
 }
-
-export default AllCategory

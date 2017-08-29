@@ -1,4 +1,5 @@
 import React, { Component } from 'react'
+import { Link } from 'react-router-dom'
 
 import {
   upVotePost_wrapper,
@@ -37,25 +38,25 @@ class PostList  extends Component {
           </button>
           <ul className="dropdown-menu">
             <li>
-              <button type="button" className="btn btn-black btn-xs" onClick={() => this.props.dispatch(sortByUpVotePosts(this.props.comment))}>
+              <button type="button" className="btn btn-black btn-xs" onClick={() => this.props.dispatch(sortByUpVotePosts(this.props.posts))}>
                 UpVotes
               </button>
             </li>
             <li role="separator" className="divider"></li>
             <li>
-              <button type="button" className="btn btn-black btn-xs" onClick={() => this.props.dispatch(sortByDownVotePosts(this.props.comment))}>
+              <button type="button" className="btn btn-black btn-xs" onClick={() => this.props.dispatch(sortByDownVotePosts(this.props.posts))}>
                 DownVotes
               </button>
             </li>
             <li role="separator" className="divider"></li>
             <li>
-              <button type="button" className="btn btn-black btn-xs" onClick={() => this.props.dispatch(sortByIncTimePosts(this.props.comment))}>
+              <button type="button" className="btn btn-black btn-xs" onClick={() => this.props.dispatch(sortByIncTimePosts(this.props.posts))}>
                 Inc Time
               </button>
             </li>
             <li role="separator" className="divider"></li>  
             <li>
-              <button type="button" className="btn btn-black btn-xs" onClick={() => this.props.dispatch(sortByDecTimePosts(this.props.comment))}>
+              <button type="button" className="btn btn-black btn-xs" onClick={() => this.props.dispatch(sortByDecTimePosts(this.props.posts))}>
                 Dec Time
               </button>
             </li>                  
@@ -73,7 +74,7 @@ class PostList  extends Component {
 	                    <button className="btn btn-black btn-sm pull-right">Vote Score : {post.voteScore}</button>
 	                  </h3>
 	                  <p className="small">
-                      <span className="glyphicon glyphicon-user"></span> {post.author} <span className="glyphicon glyphicon-time"></span> {(new Date(post.timestamp)).toString()}
+                      <span className="glyphicon glyphicon-user"></span> {post.author} <span className="glyphicon glyphicon-time"></span> {(new Date(post.timestamp)).toLocaleString()}
                     </p>
 	                  <div>
 	                    <button type="button" className="btn btn-black btn-sm" onClick={() => this.handleUpVotePost(post.id)}>
@@ -82,6 +83,9 @@ class PostList  extends Component {
 	                    <button type="button" className="btn btn-black btn-sm" onClick={() => this.handleDownVotePost(post.id)}>
 	                      Downvote <span className="glyphicon glyphicon-thumbs-down"></span>
 	                    </button>
+                      <button type="button" className="btn btn-black btn-sm">
+                        <span className="glyphicon glyphicon-comment"></span> {this.props.comments.hasOwnProperty(post.id) ? this.props.comments[post.id].length : 0}
+                      </button>
 	                    <button type="button" className="btn btn-black btn-sm pull-right" onClick={() => this.handleDeletePost(post.id)}>
                         <span className="glyphicon glyphicon-trash"></span>
                       </button>

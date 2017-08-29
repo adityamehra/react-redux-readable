@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
-import sortBy from 'sort-by'
 import serializeForm from 'form-serialize'
 import { showSnack, dismissSnack } from 'react-redux-snackbar';
+import { Link } from 'react-router-dom'
 
 import {
   fetchComments,
@@ -14,7 +14,7 @@ import {
   deleteComment_wrapper
 } from '../utils/api_thunk_wrapper.js'
 
-import { sortByUpVoteComments, sortByDownVoteComments } from '../actions'
+import { sortByUpVoteComments, sortByDownVoteComments, sortByIncTimeComments, sortByDecTimeComments } from '../actions'
 
 import './App.css'
 
@@ -22,25 +22,6 @@ class Post extends Component {
 
   componentDidMount() {
     this.props.dispatch(fetchComments(this.props.postId))
-    this.sortComments()
-    // this.props.dispatch(this.sortComments())
-  }
-
-  componentWillReceiveProps() {
-
-    
-  }
-
-  sortComments = () => {
-    // console.log("sort comments")
-    this.props.dispatch(sortByUpVoteComments(this.props.comment))
-    // console.log(this.props.comment)
-  }
-
-  downSortComments = () => {
-    // console.log("sort comments")
-    this.props.dispatch(sortByDownVoteComments(this.props.comment))
-    // console.log(this.props.comment)
   }
 
   showSnackBar = (id, label) => {
@@ -66,6 +47,8 @@ class Post extends Component {
   }
 
   handleSubmitComment = (postId) => (e) => {
+    console.log()
+    console.log()
     e.preventDefault()
     const values = serializeForm(e.target, { hash: true })
     const comment = {
@@ -80,36 +63,44 @@ class Post extends Component {
     }
     this.props.dispatch(postComment(comment))
     this.showSnackBar(Math.random().toString(36).substr(-8), "Comment added!")
+    e.target.comment.value = ""
+    e.target.author.value = ""
   }
 
-  handleUpVoteComment = (id) => {
-    this.props.dispatch(upVoteComment_wrapper(id))
+  handleUpVoteComment = (id, parentId) => {
+    console.log(parentId)
+    this.props.dispatch(upVoteComment_wrapper(id, parentId))
   }
 
-  handleDownVoteComment = (id) => {
-    this.props.dispatch(downVoteComment_wrapper(id))
+  handleDownVoteComment = (id, parentId) => {
+    this.props.dispatch(downVoteComment_wrapper(id, parentId))
   }
 
-  handleDeleteComment = (id) => {
-    this.props.dispatch(deleteComment_wrapper(id))
+  handleDeleteComment = (id, parentId) => {
+    this.props.dispatch(deleteComment_wrapper(id, parentId))
     this.showSnackBar(Math.random().toString(36).substr(-8), "Comment deleted!")
-    console.log("handleDeleteComment " + id )
   }
 
 	render() {
-        // console.log(this.props)
         const postId = this.props.postId
         return (
             <div>
               {this.props.post.map((post) => {
                 if(post.id === postId){
-                  return (
+                  if(!post.deleted){
+                    return (
                     <div key={post.id}>
                       <div className="container">
                         <div className="col-md-7">
                           <h1>{post.title}</h1>
+                          <h4>
+                            <span className="pull-right"><span className="glyphicon glyphicon-tag"></span> {post.category}</span>
+                            <span className="glyphicon glyphicon-comment"></span> {this.props.comment.hasOwnProperty(postId) ? this.props.comment[postId].length : 0}
+                          </h4>
+                          <hr />
                           <p className="lead">
-                              by <a href="">{post.author}</a>
+                            <span className="glyphicon glyphicon-user"></span> {post.author} 
+                            <span className=" pull-right"><span className="glyphicon glyphicon-time"></span>  {(new Date(post.timestamp)).toLocaleString()} </span> 
                           </p>
                           <hr />
                           <div>
@@ -125,13 +116,10 @@ class Post extends Component {
                             <button type="button" className="btn btn-black btn-xs pull-right" onClick={() => this.handleDeletePost(post.id)}>
                               <span className="glyphicon glyphicon-trash"></span>
                             </button>
-                            <button type="button" className="btn btn-black btn-xs pull-right">
+                            <a href={`/editPost/${post.id}`} type="button" className="btn btn-black btn-xs pull-right">
                               <span className="glyphicon glyphicon-edit"></span>
-                            </button>  
+                            </a>
                           </div>
-                          <hr />
-                          <p><span className="glyphicon glyphicon-time"></span> Posted on {(new Date(post.timestamp)).toString()}</p>
-                          {console.log(new Date(post.timestamp))}
                           <hr />
                           <p className="lead">{post.body}</p>
                           <hr />
@@ -142,36 +130,49 @@ class Post extends Component {
                                      <input type="text" name="author" className="form-control" placeholder="Author" />
                                 </div>
                                 <div className="form-group">
-                                    <textarea type="text" name="comment" className="form-control" rows="3" placeholder="Comment"></textarea>
+                                    <textarea type="text" name="comment" className="form-control" rows="3" placeholder="Add a Comment..."></textarea>
                                 </div>
                                 <button className="btn btn-black">Comment</button>
                             </form>
                           </div>
                         </div>
-                        <h4>Comments</h4>
-                        <hr />
                         <div className="col-md-5">
-                          <div className="btn-group">
+                          <h3 className="make-block-inline">
+                            Comments
+                          </h3>
+                          <div className="btn-group pull-right">
                             <button type="button" className="btn btn-black dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                               Sort by <span className="caret"></span>
                             </button>
                             <ul className="dropdown-menu">
-                              <li onClick={() => this.props.dispatch(sortByUpVoteComments(this.props.comment))}>
-                                <button type="button" className="btn btn-black btn-xs" >
+                              <li>
+                                <button type="button" className="btn btn-black btn-xs" onClick={() => this.props.dispatch(sortByUpVoteComments({parentId: post.id}))}>
                                   UpVotes
                                 </button>
                               </li>
                               <li role="separator" className="divider"></li>
                               <li>
-                                <button type="button" className="btn btn-black btn-xs" onClick={() => this.props.dispatch(sortByDownVoteComments(this.props.comment))}>
+                                <button type="button" className="btn btn-black btn-xs" onClick={() => this.props.dispatch(sortByDownVoteComments({parentId: post.id}))}>
                                   DownVotes
                                 </button>
-                              </li>                
+                              </li>
+                              <li role="separator" className="divider"></li>
+                              <li>
+                                <button type="button" className="btn btn-black btn-xs" onClick={() => this.props.dispatch(sortByIncTimeComments({parentId: post.id}))}>
+                                  Inc Time
+                                </button>
+                              </li>
+                              <li role="separator" className="divider"></li>  
+                              <li>
+                                <button type="button" className="btn btn-black btn-xs" onClick={() => this.props.dispatch(sortByDecTimeComments({parentId: post.id}))}>
+                                  Dec Time
+                                </button>
+                              </li>                  
                             </ul>
                           </div>         
                           <hr />
                           <div>
-                            {this.props.comment.map((comment) => {
+                            {this.props.comment[postId] && this.props.comment[postId].map((comment) => {
                               if(!comment.deleted) {
                                 return (
                                   <div className="media" key={comment.id}>
@@ -179,23 +180,25 @@ class Post extends Component {
                                       <img className="media-object" src="http://placehold.it/64x64" alt="" />
                                     </a>
                                     <div className="media-body">
-                                        <h4 className="media-heading">{comment.author}  <small>{(new Date(comment.timestamp)).toString()}</small>
+                                        <h4 className="media-heading">
+                                          {comment.author}  <small className="pull-right">{(new Date(comment.timestamp)).toLocaleString()}</small>
                                         </h4>
                                         <p>{comment.body}</p>
-                                        <a>
-                                          <button type="button" className="btn btn-black btn-xs">
-                                            Vote Score : {comment.voteScore}
-                                          </button>
-                                          <button type="button" className="btn btn-black btn-xs" onClick={() => this.handleUpVoteComment(comment.id)}>
-                                            <span className="glyphicon glyphicon-thumbs-up"></span>
-                                          </button>
-                                          <button type="button" className="btn btn-black btn-xs" onClick={() => this.handleDownVoteComment(comment.id)}>
-                                            <span className="glyphicon glyphicon-thumbs-down"></span>
-                                          </button>
+                                        <button type="button" className="btn btn-black btn-xs">
+                                          Vote Score : {comment.voteScore}
+                                        </button>
+                                        <button type="button" className="btn btn-black btn-xs" onClick={() => this.handleUpVoteComment(comment.id, postId)}>
+                                          <span className="glyphicon glyphicon-thumbs-up"></span>
+                                        </button>
+                                        <button type="button" className="btn btn-black btn-xs" onClick={() => this.handleDownVoteComment(comment.id, postId)}>
+                                          <span className="glyphicon glyphicon-thumbs-down"></span>
+                                        </button>
+                                        <button type="button" className="btn btn-danger btn-xs pull-right" onClick={() => this.handleDeleteComment(comment.id, postId)}><span className="glyphicon glyphicon-trash"></span></button>
+                                        <a href={`/editComment/${comment.id}`} type="button" className="btn btn-black btn-xs pull-right">
+                                          <span className="glyphicon glyphicon-edit"></span>
                                         </a>
-                                        <button type="button" className="btn btn-danger btn-xs pull-right" onClick={() => this.handleDeleteComment(comment.id)}><span className="glyphicon glyphicon-trash"></span></button>
-                                        <button type="button" className="btn btn-black btn-xs pull-right"> Edit </button>
                                     </div>
+                                    <hr />
                                   </div>
                                 )
                               }
@@ -205,9 +208,17 @@ class Post extends Component {
                         </div>
                       </div>
                     </div>
-                  )
+                    )
+                  }else{
+                    return (
+                      <div className="container">
+                        <div className="col-md-7">
+                          <p className="lead bg-danger">Post is Deleted!</p>
+                        </div>
+                      </div>
+                    )
+                  }
                 }
-                return null;
               })}
             </div>
         )

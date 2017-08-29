@@ -16,8 +16,18 @@ import {
 	DOWN_VOTE_POST,
 	UP_VOTE_COMMENT,
 	DOWN_VOTE_COMMENT,
-	SORT_BY_UP_VOTE,
-	SORT_BY_DOWN_VOTE 
+	SORT_BY_UP_VOTE_POSTS,
+	SORT_BY_DOWN_VOTE_POSTS,
+	SORT_BY_INC_TIME_POSTS,
+	SORT_BY_DEC_TIME_POSTS,
+	SORT_BY_UP_VOTE_COMMENTS,
+	SORT_BY_DOWN_VOTE_COMMENTS,
+	SORT_BY_INC_TIME_COMMENTS,
+	SORT_BY_DEC_TIME_COMMENTS,
+	EDIT_FORM_BODY_POST,
+	EDIT_FORM_TITLE_POST,
+	EDIT_FORM_BODY_COMMENT,
+	RECEIVE_SINGLE_COMMENT  
 } from '../actions'
 
 function category (state = {}, action) {
@@ -49,24 +59,19 @@ function category (state = {}, action) {
  * deleted		Boolean	Flag if post has been 'deleted' (inaccessible by the front end), (default: false) 
  */
 
-function post (state = {}, action) {
+function post (state = [], action) {
 
 	const { id, timestamp, title, body, author, category, voteScore, deleted, posts } = action
 
-	switch(action.type){
+	switch(action.type) {
 		case RECEIVE_POSTS:
 			let result = posts.reduce((obj,item) => {
-  							obj[item.id] = item; 
+  							obj.push(item); 
   							return obj;
-						}, {});
-			return {
-				...state,
-				...result
-			}
+						}, []);
+			return state.concat(result)
 		case ADD_POST:
-			return {
-				...state,
-				[id]: {
+			return (state.concat([{
 					id,
 					timestamp, 
 					title, 
@@ -75,34 +80,24 @@ function post (state = {}, action) {
 					category, 
 					voteScore, 
 					deleted
-				}
-			}
+				}]))
 		case UP_VOTE_POST:
-
-			const upVoteScore = parseInt(state[id]['voteScore'], 10) + 1
-
-			return {
-				...state,
-				[id]: {
-					...state[id],
-					voteScore: upVoteScore
+			return (state.map(post => {
+				if(post.id === id) {
+					post['voteScore'] = parseInt(post['voteScore'], 10) + 1
 				}
-			}
+				return post 	
+			}))
 		case DOWN_VOTE_POST:
-
-			const downVoteScore = parseInt(state[id]['voteScore'], 10) - 1
-
-			return {
-				...state,
-				[id]: {
-					...state[id],
-					voteScore: downVoteScore
+			return (state.map(post => {
+				if(post.id === id) {
+					post['voteScore'] = parseInt(post['voteScore'], 10) - 1
 				}
-			}
+				return post
+			}))
 		case EDIT_POST:
-			return {
-				...state,
-				[id]: {
+			return state.filter(post => post.id !== id).concat(
+				[{
 					id,
 					timestamp, 
 					title, 
@@ -111,20 +106,26 @@ function post (state = {}, action) {
 					category, 
 					voteScore, 
 					deleted
-				}
-			}
+				}]
+			)
 		case DELETE_POST:
-			return {
-				...state,
-				[id]: {
-					...state[id],
-					[deleted]: true
+			return state.map(post => { 
+				if(post.id === id) {
+					post.deleted = true
 				}
-			}
+				return post
+			})
+		case SORT_BY_UP_VOTE_POSTS:
+			return [...state.sort(sortBy('voteScore'))]
+		case SORT_BY_DOWN_VOTE_POSTS:
+			return [...state.sort(sortBy('-voteScore'))]
+		case SORT_BY_INC_TIME_POSTS:
+			return [...state.sort(sortBy('timestamp'))]
+		case SORT_BY_DEC_TIME_POSTS:
+			return [...state.sort(sortBy('-timestamp'))]
 		default:
 			return state;
 	}
-
 }
 
 /**
@@ -139,127 +140,77 @@ function post (state = {}, action) {
  * parentDeleted Boolean Flag for when the the parent post was deleted, but the comment itself was not.
  */
 
-// function comment (state = {}, action) {
-
-// 	const { id, parentId, timestamp, body, author, voteScore, deleted, parentDeleted, comments } = action
-
-// 	switch(action.type) {
-// 		case RECEIVE_COMMENTS:
-// 			let result = comments.reduce((obj,item) => {
-//   							obj[item.id] = item; 
-//   							return obj;
-// 						}, {});
-// 			return {
-// 				...state,
-// 				...result
-// 			}
-// 		case ADD_COMMENT:
-// 			return {
-// 				...state,
-// 				[id]: {
-// 					id, 
-// 					parentId, 
-// 					timestamp, 
-// 					body, 
-// 					author, 
-// 					voteScore, 
-// 					deleted, 
-// 					parentDeleted
-// 				}
-
-// 			}
-// 		case UP_VOTE_COMMENT:
-
-// 			const upVoteScore = parseInt(state[id]['voteScore'], 10) + 1
-
-// 			return {
-// 				...state,
-// 				[id]: {
-// 					...state[id],
-// 					voteScore: upVoteScore
-// 				}
-// 			}
-// 		case DOWN_VOTE_COMMENT:
-
-// 			const downVoteScore = parseInt(state[id]['voteScore'], 10) - 1
-
-// 			return {
-// 				...state,
-// 				[id]: {
-// 					...state[id],
-// 					voteScore: downVoteScore
-// 				}
-// 			}
-// 		case EDIT_COMMENT:
-// 			return {
-// 				...state,
-// 				[id]: {
-// 					id,
-// 					timestamp, 
-// 					body, 
-// 					author, 
-// 					parentId, 
-// 					voteScore, 
-// 					deleted,
-// 					parentDeleted
-// 				}
-// 			}
-// 		case DELETE_COMMENT:
-// 			return {
-// 				...state,
-// 				[id]: {
-// 					...state[id],
-// 					deleted: true
-// 				}
-// 			}
-// 		case SORT_BY_UP_VOTE:
-// 			comments.sort(sortBy('voteScore'))
-// 			return comments
-
-// 		// case SORT_BY_DOWN_VOTE:
-
-// 		default:
-// 			return state;
-// 	}
-// }
-
-function comment (state = [], action) {
+function comment (state = {}, action) {
 
 	const { id, parentId, timestamp, body, author, voteScore, deleted, parentDeleted, comments } = action
-
+	let newCommentsArray = []
 	switch(action.type) {
 		case RECEIVE_COMMENTS:
 			let result = comments.reduce((obj,item) => {
-  							obj.push(item); 
+							if(!obj.hasOwnProperty(item.parentId)){
+								obj[item.parentId] = [item]
+							}else{
+								obj[item.parentId].push(item)
+							}
+  							
   							return obj;
-						}, []);
-			return state.concat(result)
+						}, {});
+			return {
+				...state,
+				...result
+			}
 		case ADD_COMMENT:
-			return (state.concat([{
-					id, 
-					parentId, 
-					timestamp, 
-					body, 
-					author, 
-					voteScore, 
-					deleted, 
-					parentDeleted
-				}]))
-		case UP_VOTE_COMMENT:
-			console.log(state)
-			return (state.map(comment => {
-				if(comment.id === id){
-					comment['voteScore'] = parseInt(comment['voteScore'], 10) + 1
+			if(state.hasOwnProperty(parentId)) {
+				return {
+					...state,
+					[parentId]: state[parentId].concat([{
+						id, 
+						parentId, 
+						timestamp, 
+						body, 
+						author, 
+						voteScore, 
+						deleted, 
+						parentDeleted
+					}])
 				}
-				return comment	
-			}))
+			}else {
+				return {
+					...state,
+					[parentId]: [{
+						id, 
+						parentId, 
+						timestamp, 
+						body, 
+						author, 
+						voteScore, 
+						deleted, 
+						parentDeleted
+					}]
+				}
+			}
+		case UP_VOTE_COMMENT:
+			newCommentsArray = state[parentId].map(comment => {
+									if(comment.id === id) {
+										comment['voteScore'] = parseInt(comment['voteScore'], 10) + 1
+									}
+									return comment	
+								})
+
+			return {
+				...state,
+				[parentId]: newCommentsArray
+			}
 		case DOWN_VOTE_COMMENT:
-			return (state.map(comment => {
-				if(comment.id == id){
+			return {
+				...state,
+				[parentId]: state[parentId].map(comment => {
+				if(comment.id === id) {
 					comment['voteScore'] = parseInt(comment['voteScore'], 10) - 1
 				}
-				return comment
-			}))
+				return comment	
+			})
+			}
 		case EDIT_COMMENT:
 			return state.filter(comment => comment.id !== id).concat(
 				[{
@@ -274,25 +225,112 @@ function comment (state = [], action) {
 				}]
 			)
 		case DELETE_COMMENT:
-			return state.map(comment => { 
-				if(comment.id === id){
-					comment.deleted = true
+			return {
+				...state,
+				[parentId]: state[parentId].map(comment => {
+				if(comment.id === id) {
+					comment['deleted'] = true
 				}
-				return comment
+				return comment	
 			})
-		case SORT_BY_UP_VOTE:
-			return [...state.sort(sortBy('voteScore'))]
-		case SORT_BY_DOWN_VOTE:
-			return [...state.sort(sortBy('-voteScore'))]
+			}
+		case SORT_BY_UP_VOTE_COMMENTS:
+			return {
+					...state,
+					[parentId]: [...state[parentId].sort(sortBy('voteScore'))]
+				}
+		case SORT_BY_DOWN_VOTE_COMMENTS:
+			return {
+					...state,
+					[parentId]: [...state[parentId].sort(sortBy('-voteScore'))]
+				}
+		case SORT_BY_INC_TIME_COMMENTS:
+			return {
+					...state,
+					[parentId]: [...state[parentId].sort(sortBy('timestamp'))]
+				}
+		case SORT_BY_DEC_TIME_COMMENTS:
+			return {
+					...state,
+					[parentId]: [...state[parentId].sort(sortBy('-timestamp'))]
+				}
 		default:
 			return state;
 	}
 }
 
+function editFormTitlePost(state = {}, action) {
+
+	const {title} = action 
+
+	switch(action.type) {
+		case EDIT_FORM_TITLE_POST:
+			return {
+				...state,
+				title
+			}
+		default:
+			return state
+	}
+}
+
+function editFormBodyPost(state = {}, action) {
+
+	const {body} = action 
+
+	switch(action.type) {
+		case EDIT_FORM_BODY_POST:
+			return {
+				...state,
+				body
+			}
+		default:
+			return state
+	}
+}
+
+function editFormBodyComment(state = {}, action) {
+
+	const {body} = action
+
+	switch(action.type) {
+		case EDIT_FORM_BODY_COMMENT:
+			return {
+				...state,
+				body
+			}
+		default:
+			return state
+	}
+}
+
+function singleComment(state = {}, action) {
+
+	const { id, parentId, timestamp, body, author, voteScore, deleted, parentDeleted, comment } = action
+
+	switch(action.type) {
+		case RECEIVE_SINGLE_COMMENT:
+			return {
+				...state,
+				...comment
+			}
+		case EDIT_FORM_BODY_COMMENT:
+			return {
+				...state,
+				'body': body
+			}
+		default:
+			return state
+	}
+}
 
 export default combineReducers({
 	category,
 	post,
 	comment,
+	editFormBodyPost,
+  editFormTitlePost,
+  editFormBodyComment,
+  singleComment,
 	snackbar: snackbarReducer
 })

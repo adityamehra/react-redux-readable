@@ -1,19 +1,33 @@
 import React, { Component } from 'react'
+import { connect } from 'react-redux'
+
+import PostList from './PostList'
 
 class Category extends Component {
 
-	render() {
-                <h2>
-                    <a href="#">Blog Post Title</a>
-                </h2>
-                <p class="lead">
-                    by <a href="index.php">Start Bootstrap</a>
-                </p>
-                <p><span class="glyphicon glyphicon-time"></span> Posted on August 28, 2013 at 10:00 PM</p>
-                <hr>
-                <img class="img-responsive" src="http://placehold.it/900x300" alt="">
-                <hr>
-                <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Dolore, veritatis, tempora, necessitatibus inventore nisi quam quia repellat ut tempore laborum possimus eum dicta id animi corrupti debitis ipsum officiis rerum.</p>
-                <a class="btn btn-primary" href="#">Read More <span class="glyphicon glyphicon-chevron-right"></span></a>
-	}
+  render() {
+    return (
+      <div className="container">
+        <div className="row">
+          <h2> <span className="glyphicon glyphicon-th-list"></span> Posts </h2>
+          <h2><small><span className="glyphicon glyphicon-tag"></span> {this.props.categoryName } </small></h2>
+          <PostList 
+            dispatch = {this.props.dispatch}
+            posts={this.props.posts}
+            comments={this.props.comments}
+          />
+        </div>
+      </div>
+    )
+  }
 }
+
+function mapStateToProps ( { post, comment }, ownProps ){
+    return {
+      posts: post.filter(post => post.category === ownProps.categoryName),
+      comments:comment,
+      categoryName: ownProps.categoryName
+    }
+}
+
+export default connect(mapStateToProps)(Category);

@@ -11,7 +11,8 @@ import {
   upVoteComment, 
   downVoteComment,  
   deleteComment, 
-  receiveComments 
+  receiveComments,
+  receiveSingleComment,
 } from '../actions'
 
 export const fetchCategories = () => dispatch => (
@@ -20,13 +21,6 @@ export const fetchCategories = () => dispatch => (
     .then(categories => dispatch(receiveCategories(categories)))
 );
 
-export const fetchPosts = () => dispatch => (
-  API
-    .getAllPosts()
-    .then((posts) => dispatch(receivePosts(posts)))
-);
-
-/**
 export const fetchPostsAndComments = () => dispatch => (
   dispatch(fetchPosts())
 )
@@ -37,18 +31,17 @@ export const fetchPosts = () => dispatch => (
     .then((posts) => {
       Promise.all([
         dispatch(receivePosts(posts)),
-        // dispatch(fetchComments(posts))
+        dispatch(fetchAllComments(posts))
       ])
     })
 );
 
-export const fetchComments = (posts) => dispatch => (
+export const fetchAllComments = (posts) => dispatch => (
   posts.map((post) => API
     .getAllComments(post.id)
     .then(comments => dispatch(receiveComments(comments)))
   )
 );
-*/
 
 export const fetchComments = (id) => dispatch => (
   API
@@ -84,23 +77,29 @@ export const downVotePost_wrapper = (id) => dispatch => (
 export const deletePost_wrapper = (id) => dispatch => (
   API
     .deletePost(id)
-    .then(id => dispatch(deletePost({ id })))
+    .then(() => dispatch(deletePost({ id })))
 );
 
-export const deleteComment_wrapper = (id) => dispatch => (
+export const deleteComment_wrapper = (id, parentId) => dispatch => (
   API
     .deleteComment(id)
-    .then(() => dispatch(deleteComment({id})))
+    .then(() => dispatch(deleteComment({id, parentId})))
 );
 
-export const upVoteComment_wrapper = (id) => dispatch => (
+export const upVoteComment_wrapper = (id, parentId) => dispatch => (
   API
     .upVoteComment(id)
-    .then(() => dispatch(upVoteComment({id})))
+    .then(() => dispatch(upVoteComment({id, parentId})))
 );
 
-export const downVoteComment_wrapper = (id) => dispatch => (
+export const downVoteComment_wrapper = (id, parentId) => dispatch => (
   API
     .downVoteComment(id)
-    .then(() => dispatch(downVoteComment({id})))
+    .then(() => dispatch(downVoteComment({id, parentId})))
 );
+
+export const receiveSingleComment_wrapper = (id) => dispatch => (
+  API
+    .getSingleComment(id)
+    .then((comment) => dispatch(receiveSingleComment(comment)))
+)

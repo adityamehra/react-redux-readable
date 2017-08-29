@@ -11,8 +11,18 @@ export const UP_VOTE_POST = 'UP_VOTE_POST'
 export const DOWN_VOTE_POST = 'DOWN_VOTE_POST'
 export const UP_VOTE_COMMENT = 'UP_VOTE_COMMENT'
 export const DOWN_VOTE_COMMENT = 'DOWN_VOTE_COMMENT'
-export const SORT_BY_UP_VOTE = 'SORT_BY_UP_VOTE'
-export const SORT_BY_DOWN_VOTE = 'SORT_BY_DOWN_VOTE'
+export const SORT_BY_UP_VOTE_POSTS = 'SORT_BY_UP_VOTE_POSTS'
+export const SORT_BY_DOWN_VOTE_POSTS = 'SORT_BY_DOWN_VOTE_POSTS'
+export const SORT_BY_INC_TIME_POSTS = 'SORT_BY_INC_TIME_POSTS'
+export const SORT_BY_DEC_TIME_POSTS = 'SORT_BY_DEC_TIME'
+export const SORT_BY_UP_VOTE_COMMENTS = 'SORT_BY_UP_VOTE_COMMENTS'
+export const SORT_BY_DOWN_VOTE_COMMENTS = 'SORT_BY_DOWN_VOTE_COMMENTS'
+export const SORT_BY_INC_TIME_COMMENTS = 'SORT_BY_INC_TIME_COMMENTS'
+export const SORT_BY_DEC_TIME_COMMENTS = 'SORT_BY_DEC_TIME_COMMENTS'
+export const EDIT_FORM_BODY_POST = "EDIT_FORM_BODY_POST"
+export const EDIT_FORM_TITLE_POST = "EDIT_FORM_TITLE_POST"
+export const EDIT_FORM_BODY_COMMENT = "EDIT_FORM_COMMENT"
+export const RECEIVE_SINGLE_COMMENT = "RECEIVE_SINGLE_COMMENT"
 
 export function receiveCategories( categories ) {
 	return {
@@ -70,6 +80,34 @@ export function editPost({ id, timestamp, title, body, author, category, voteSco
 	}
 }
 
+export function sortByUpVotePosts( posts ) {
+	return {
+		type : SORT_BY_UP_VOTE_POSTS,
+		posts
+	}
+}
+
+export function sortByDownVotePosts( posts ) {
+	return {
+		type : SORT_BY_DOWN_VOTE_POSTS,
+		posts
+	}
+}
+
+export function sortByIncTimePosts( posts ) {
+	return {
+		type : SORT_BY_INC_TIME_POSTS,
+		posts
+	}
+}
+
+export function sortByDecTimePosts( posts ) {
+	return {
+		type : SORT_BY_DEC_TIME_POSTS,
+		posts
+	}
+}
+
 export function deletePost({ id }) {
 	return {
 		type : DELETE_POST,
@@ -77,7 +115,7 @@ export function deletePost({ id }) {
 	}
 }
 
-export function receiveComments( comments ){
+export function receiveComments( comments ) {
 	return {
 		type : RECEIVE_COMMENTS,
 		comments
@@ -98,17 +136,19 @@ export function addComment({ id, parentId, timestamp, body, author, voteScore, d
 	}
 }
 
-export function upVoteComment({ id }) {
+export function upVoteComment({ id, parentId }) {
 	return {
 		type : UP_VOTE_COMMENT,
-		id
+		id,
+		parentId
 	}
 }
 
-export function downVoteComment({ id }) {
+export function downVoteComment({ id, parentId }) {
 	return {
 		type : DOWN_VOTE_COMMENT,
-		id
+		id,
+		parentId
 	}
 }
 
@@ -126,24 +166,71 @@ export function editComment({ id, parentId, timestamp, body, author, voteScore, 
 	}
 }
 
-export function sortByUpVoteComments( comments ){
+export function sortByUpVoteComments({ parentId }) {
+	console.log(parentId)
 	return {
-		type : SORT_BY_UP_VOTE,
-		comments
+		type : SORT_BY_UP_VOTE_COMMENTS,
+		parentId
 	}
 }
 
-export function sortByDownVoteComments( comments ){
+export function sortByDownVoteComments({ parentId }) {
+	console.log(parentId)
 	return {
-		type : SORT_BY_DOWN_VOTE,
-		comments
+		type : SORT_BY_DOWN_VOTE_COMMENTS,
+		parentId
 	}
 }
 
-export function deleteComment({ id }) {
+export function sortByIncTimeComments({ parentId }) {
+	console.log(parentId)
+	return {
+		type : SORT_BY_INC_TIME_COMMENTS,
+		parentId
+	}
+}
+
+export function sortByDecTimeComments({ parentId }) {
+	console.log(parentId)
+	return {
+		type : SORT_BY_DEC_TIME_COMMENTS,
+		parentId
+	}
+}
+
+export function deleteComment({ id, parentId }) {
 	return {
 		type : DELETE_COMMENT,
-		id
+		id, 
+		parentId
+	}
+}
+
+export function editFormBodyPost({body}) {
+	return {
+		type: EDIT_FORM_BODY_POST,
+		body
+	}
+}
+
+export function editFormTitlePost({title}) {
+	return {
+		type: EDIT_FORM_TITLE_POST,
+		title
+	}
+}
+
+export function editFormBodyComment({body}) {
+	return {
+		type: EDIT_FORM_BODY_COMMENT,
+		body
+	}
+}
+
+export function receiveSingleComment( comment ) {
+	return {
+		type: RECEIVE_SINGLE_COMMENT,
+		comment
 	}
 }
 
