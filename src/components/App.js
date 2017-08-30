@@ -1,12 +1,11 @@
 import React, { Component } from 'react'
-import { Route, Link } from 'react-router-dom'
+import { Route } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { Snackbar } from 'react-redux-snackbar';
 
 import {
   fetchCategories,
   fetchPostsAndComments,
-  fetchPosts,
 } from '../utils/api_thunk_wrapper.js'
 
 import './App.css'
@@ -26,7 +25,6 @@ class App extends Component {
   }
 
   render() {
-    // console.log(this.props)
     return (
       <div className="App">
         <Snackbar />
@@ -44,7 +42,7 @@ class App extends Component {
             categoryName={match.params.category}
           />
         )}/>
-        <Route path='/post/:id' render = {({match}) => (
+        <Route path='/:category/:id' render = {({match}) => (
           <Post 
             dispatch = {this.props.dispatch}
             postId = {match.params.id}
