@@ -3,7 +3,6 @@ import * as API from '../utils/api'
 import { 
   receiveCategories,
   receivePosts,
-  addPost, 
   upVotePost, 
   downVotePost,
   deletePost,

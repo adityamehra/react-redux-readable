@@ -6,7 +6,6 @@ import { showSnack } from 'react-redux-snackbar';
 import { editFormBodyPost, editFormTitlePost } from '../actions'
 import { editPost } from '../utils/api'
 
-
 class EditPost extends Component {
 
   componentWillReceiveProps(nextProps) {
@@ -49,26 +48,26 @@ class EditPost extends Component {
 
 	render() {
 		return (
-        <div className="container">
-          <div className="col-md-6">
-            <p className="lead">
-              Edit Post
-            </p>
-            <form onSubmit={this.handleEditPost}>
-              <div className="form-group">
-                <label>Title</label>
-                <input name="title" type="text" className="form-control" value={this.props.editFormTitlePost ? this.props.editFormTitlePost.title:"loading..."} onChange={this.setEditTitleFormPost} />
-              </div>
-              <div className="form-group">
-                <label>Post</label>
-                <textarea name="body" className="form-control" rows="8" value={this.props.editFormBodyPost ? this.props.editFormBodyPost.body:"loading..."} onChange={this.setEditBodyFormPost}></textarea>
-              </div>
-              <button className="btn btn-black">
-                Save Chages!
-              </button>
-            </form>
-          </div>
+      <div className="container">
+        <div className="col-md-6">
+          <p className="lead">
+            Edit Post
+          </p>
+          <form onSubmit={this.handleEditPost}>
+            <div className="form-group">
+              <label>Title</label>
+              <input name="title" type="text" className="form-control" value={this.props.editFormTitlePost ? this.props.editFormTitlePost.title:"loading..."} onChange={this.setEditTitleFormPost} />
+            </div>
+            <div className="form-group">
+              <label>Post</label>
+              <textarea name="body" className="form-control" rows="8" value={this.props.editFormBodyPost ? this.props.editFormBodyPost.body:"loading..."} onChange={this.setEditBodyFormPost}></textarea>
+            </div>
+            <button className="btn btn-black">
+              Save Chages!
+            </button>
+          </form>
         </div>
+      </div>
     )
 	}
 }

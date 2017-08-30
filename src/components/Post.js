@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 import serializeForm from 'form-serialize'
-import { showSnack, dismissSnack } from 'react-redux-snackbar';
-import { Link } from 'react-router-dom'
+import { showSnack } from 'react-redux-snackbar';
 
 import {
   fetchComments,
@@ -219,6 +218,7 @@ class Post extends Component {
                     )
                   }
                 }
+                return null
               })}
             </div>
         )

@@ -1,7 +1,6 @@
 import React from 'react'
 
 import AllCategories from './AllCategories'
-import Category from './Category'
 import PostList from './PostList'
 
 export default function CategoriesAndPosts(props) {
