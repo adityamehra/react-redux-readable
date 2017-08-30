@@ -70,7 +70,7 @@ class PostList  extends Component {
 	              <div key={post.id}>
 	                <li>
 	                  <h3>
-	                    <a href={`/post/${post.id}`}>{post.title}</a>
+	                    <a href={`/${post.category}/${post.id}`}>{post.title}</a>
 	                    <button className="btn btn-black btn-sm pull-right">Vote Score : {post.voteScore}</button>
 	                  </h3>
 	                  <p className="small">
